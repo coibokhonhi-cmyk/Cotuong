@@ -50,7 +50,7 @@ body{--w:min(100vw - 16px,720px,calc((100dvh - 236px)*.9));display:flex;flex-dir
 .cap-text{position:absolute;translate:-50% -50%;font:900 11cqw/1 KaiTi,STKaiti,"Kaiti SC",serif;color:#c4161c;-webkit-text-stroke:.3cqw #3a0000;text-shadow:0 0 2cqw #ff2020,0 0 4cqw #ff0000;z-index:25;pointer-events:none;animation:capPop .8s cubic-bezier(.15,.85,.25,1) forwards;will-change:transform,opacity}
 @keyframes capPop{0%{opacity:0;transform:scale(0.3) rotate(-15deg)}30%{opacity:1;transform:scale(1.2) rotate(5deg)}100%{opacity:0;transform:translateY(-8cqw) scale(0.9) rotate(0deg)}}
 body.flipped #bd{rotate:180deg}
-body.flipped #end{rotate:180deg}
+body.flipped #end{transform:rotate(180deg) !important;}
 body.flipped .p, body.flipped .check-char, body.flipped .check-char-double, body.flipped .trạm-char, body.flipped .cap-text, body.flipped .trạm-seal{rotate:180deg}
 body.flipped .p.dead{rotate:210deg}
 #end{position:absolute;inset:0;z-index:20;display:grid;place-content:center;justify-items:center;gap:2cqw;text-align:center;background:#1a0d04d0;font-size:4.5cqw;animation:drop .4s backwards;padding:12px}
@@ -454,6 +454,17 @@ body.friendly-match #friendly-banner{display:block}
   </div>
 </div>
 
+<div id="friend-req-modal" class="modal-overlay">
+  <div class="m-panel" style="border-color:#e6c36e">
+    <h2>LỜI MỜI KẾT BẠN</h2>
+    <div id="friend-req-content" style="margin:20px 0;color:#fff;font-size:15px;line-height:1.5"></div>
+    <div style="display:flex;gap:10px">
+      <button class="auth-btn" id="btn-accept-friend" style="background:#e6c36e;color:#000">Đồng Ý</button>
+      <button class="auth-btn" id="btn-decline-friend" style="background:transparent;border:1px solid #444;color:#aaa">Từ Chối</button>
+    </div>
+  </div>
+</div>
+
 <div id="incoming-modal" class="modal-overlay">
   <div class="m-panel" style="border-color:#ff4040">
     <h2>THÁCH ĐẤU</h2>
@@ -513,7 +524,7 @@ body.friendly-match #friendly-banner{display:block}
   <button id="new">Ván mới</button>
   <button id="undo">Đi lại</button>
   <button id="home">Sảnh</button>
-                                                                                                                                                                                                 </div><script>
+  </div><script>
 var XiangqiEngine = (function () {
   'use strict';
   const RED=1,BLACK=-1;
@@ -1153,7 +1164,7 @@ let oppName='Đối thủ',oppAvatar='將',opponentPts=0,oppW=0,oppL=0;
 let matchPollTimer=null;
 let isSearching=false;
 let pollInFlight=false;
-let pendingFriendReq = null; // Biến lưu lời mời kết bạn đang chờ xử lý
+let pendingFriendReq = null; // Lưu lời mời kết bạn đang chờ xử lý
 
 const LV=['Dễ','Thường','Khó','Siêu Khó'];
 const RANKS=[
@@ -1542,7 +1553,8 @@ function tick(){
     if(turn===myColor){
       if(clock[turn]<=0||pmv[turn]<=0){clock[turn]=Math.max(0,clock[turn]);pmv[turn]=Math.max(0,pmv[turn]);updateTimerDisplay();if(roomRef)roomRef.child('timeout').set({loserColor:myColor,by:myPlayerId});return finish('timeout',1-myColor);}
     }else{
-      if(clock[turn]<=-5000||pmv[turn]<=-5000){clock[turn]=0;pmv[turn]=0;updateTimerDisplay();if(roomRef)roomRef.child('timeout').set({loserColor:1-myColor,by:myPlayerId});return finish('timeout',myColor);}
+      // Đã sửa: Không dùng -5000 nữa, chờ đúng 0ms
+      if(clock[turn]<=0||pmv[turn]<=0){clock[turn]=0;pmv[turn]=0;updateTimerDisplay();if(roomRef)roomRef.child('timeout').set({loserColor:1-myColor,by:myPlayerId});return finish('timeout',myColor);}
     }
   }else{
     if(clock[turn]<=0||pmv[turn]<=0){clock[turn]=Math.max(0,clock[turn]);pmv[turn]=Math.max(0,pmv[turn]);updateTimerDisplay();return finish('timeout',1-turn);}
@@ -1662,7 +1674,8 @@ async function executePlay(m,isRemote=false,remoteClocks=null){
   if(isOnline&&!isRemote&&roomRef){
     const nextStep=hist.length+1;
     roomRef.child('move').set({m:m,by:myPlayerId,step:nextStep,clock:[Math.round(clock[0]),Math.round(clock[1])]});
-    roomRef.child('moveHistory/m'+nextStep).set({m:m,by:myPlayerId,step:nextStep});
+    // Đã sửa: Lưu kèm clock để khôi phục ván cờ
+    roomRef.child('moveHistory/m'+nextStep).set({m:m,by:myPlayerId,step:nextStep,clock:[Math.round(clock[0]),Math.round(clock[1])]});
   }
   if(e){e.classList.add('fly');e.style.left=X(y)+'%';e.style.top=Y(x)+'%';await sleep(280);if(over){busy=false;return}e.classList.remove('fly');}
   if(v){
@@ -1715,7 +1728,9 @@ function cleanupRoomListeners(){
 function finish(reason,explicitWinnerColor){
   if(over&&!$('#end').hidden)return;
   stopClock();over=true;busy=false;aiThinking=false;ui();updateTimerDisplay();
-  cleanupRoomListeners();
+  // Đã sửa: Không gọi cleanupRoomListeners() ở đây, tránh việc đối thủ thấy mình mất mạng
+  if(db&&auth&&auth.currentUser){try{db.ref('users/'+myPlayerId+'/inMatch').remove();}catch(e){}}
+  
   const w=(explicitWinnerColor!==undefined)?explicitWinnerColor:(1-turn);
   const e=$('#end');e.hidden=false;
   let sub=reason==='timeout'?'Hết giờ':reason==='chk'?'Chiếu hết':reason==='surrender'?'Đối thủ đầu hàng / mất kết nối':'Hết nước đi';
@@ -1834,6 +1849,7 @@ function lob(){
 function lobby(on){
   $('#lobby').hidden=!on;
   if(on){
+    localStorage.removeItem('currentRoomId'); // Xoá phòng khi về sảnh
     currentAiRequestId++;aiThinking=false;busy=false;
     if(isOnline&&roomRef&&!over){try{roomRef.child('surrender').set(myPlayerId);}catch(e){}}
     if(isSpectating){
@@ -1956,7 +1972,7 @@ $('#save-profile').onclick=()=>{
   sfx('sel');S.name=$('#name-input').value.trim()||'Kỳ thủ';S.avatar=tempAvatar;save();updateDBProfile();lob();ui();$('#profile-modal').classList.remove('open');
 };
 
-/* ===== BẠN BÈ (SỬA LỖI GỬI/NHẬN LỜI MỜI) ===== */
+/* ===== BẠN BÈ (GỬI/NHẬN QUA MODAL) ===== */
 async function renderFriends(){
   const flist=$('#friend-list');
   if(!S.friends||Object.keys(S.friends).length===0){
@@ -2017,7 +2033,6 @@ $('#btn-add-friend').onclick=async()=>{
   alert("✅ Đã gửi lời mời kết bạn thành công!\nVui lòng chờ đối phương xác nhận.");
 };
 
-// Tự động lắng nghe danh sách bạn bè
 function listenFriends(){
   if(!db||!myPlayerId)return;
   db.ref('users/'+myPlayerId+'/friends').on('value',snap=>{
@@ -2030,7 +2045,6 @@ function listenFriends(){
   });
 }
 
-// Tự động lắng nghe lời mời kết bạn
 function listenFriendRequests(){
   if(!db||!myPlayerId)return;
   
@@ -2047,7 +2061,6 @@ function listenFriendRequests(){
       </div>
     </div>`);
     
-    // Nút Đồng Ý
     $('#btn-accept-friend').onclick=async()=>{
       if(!pendingFriendReq)return;
       const req=pendingFriendReq;
@@ -2064,7 +2077,6 @@ function listenFriendRequests(){
       pendingFriendReq=null;
     };
 
-    // Nút Từ Chối
     $('#btn-decline-friend').onclick=async()=>{
       if(!pendingFriendReq)return;
       const req=pendingFriendReq;
@@ -2078,12 +2090,12 @@ function listenFriendRequests(){
     const fromUid=snap.key;
     const req=snap.val();
     if(!req)return;
-    if(pendingFriendReq)return; // Đang hiện 1 cái rồi thì bỏ qua cái khác (tránh spam)
+    if(pendingFriendReq)return;
     
     pendingFriendReq={uid:fromUid, ...req};
     $('#friend-req-content').innerHTML=`<b>${req.name}</b> (ID: ${req.id})<br>muốn kết bạn với bạn!`;
     $('#friend-req-modal').classList.add('open');
-    sfx('check'); // Âm thanh thông báo
+    sfx('check');
   });
 }
 
@@ -2140,7 +2152,7 @@ $('#btn-accept-chal').onclick=()=>{
 };
 $('#btn-decline-chal').onclick=()=>{sfx('sel');if(db)db.ref('challenges/'+myPlayerId).update({status:'declined'});$('#incoming-modal').classList.remove('open');};
 
-/* ===== MATCHMAKING (ĐÃ FIX POLLING) ===== */
+/* ===== MATCHMAKING (POLLING & RECONNECT) ===== */
 function cancelMatch(silent=false){
   if(!silent)sfx('sel');
   isSearching=false;
@@ -2188,7 +2200,6 @@ async function findMatch(){
       const all=snap.val()||{};
       const now=Date.now();
       
-      // Dọn node rác
       for(const uid in all){
         if(uid===myPlayerId)continue;
         const p=all[uid];
@@ -2207,7 +2218,6 @@ async function findMatch(){
       }
       
       if(myNode.matched&&myNode.roomId){
-        // BỊ CLAIM
         isSearching=false;
         if(matchPollTimer){clearInterval(matchPollTimer);matchPollTimer=null;}
         const roomId=myNode.roomId;
@@ -2239,7 +2249,6 @@ async function findMatch(){
       const roomId=[myPlayerId,oppUid].sort().join('_');
       
       if(myPlayerId<oppUid){
-        // TÔI LÀ OWNER
         console.log('[Match] Owner. room='+roomId+' opp='+oppUid.substring(0,8));
         await db.ref('rooms/'+roomId).set({player1:myPlayerId,player2:oppUid,turn:1,createdAt:Date.now()});
         await db.ref('matchmaking/'+oppUid).update({matched:true,roomId:roomId,opponent:myPlayerId});
@@ -2255,7 +2264,6 @@ async function findMatch(){
         joinFirebaseRoom(roomId);
         return;
       } else {
-        // TÔI LÀ WAITER
         console.log('[Match] Waiter. waiting for '+oppUid.substring(0,8));
         pollInFlight=false;
       }
@@ -2269,7 +2277,7 @@ async function findMatch(){
   pollOnce();
 }
 
-/* ===== SPECTATOR ===== */
+/* ===== SPECTATOR & FIREBASE ROOM ===== */
 async function joinAsSpectator(roomId,hostName){
   if(!ensureDb())return;
   cleanupRoomListeners();
@@ -2321,25 +2329,37 @@ function exitSpectator(){
   lobby(true);
 }
 
-/* ===== FIREBASE ROOM ===== */
-function joinFirebaseRoom(roomId){
+async function joinFirebaseRoom(roomId){
   cleanupRoomListeners();
   currentRoomId=roomId;roomRef=db.ref('rooms/'+roomId);
   isOnline=true;vsAI=false;isSpectating=false;
-  newGame();lobby(false);
+  
+  localStorage.setItem('currentRoomId', roomId);
+
+  const snapHistory = await db.ref('rooms/'+roomId+'/moveHistory').once('value');
+  const history = snapHistory.val() || {};
+  const entries = Object.values(history).sort((a,b) => a.step - b.step);
+  
+  B=init(); hist=[]; sel=null; over=false; busy=false;
+  entries.forEach(e=>{ mk(B, e.m); hist.push(e.m); });
+  turn = (hist.length % 2) ? 0 : 1;
+  
+  if(entries.length > 0 && entries[entries.length-1].clock) {
+    clock = entries[entries.length-1].clock;
+  } else {
+    clock = [TOTAL,TOTAL];
+  }
+  pmv = [PERMV,PERMV];
+  
+  $('#end').hidden=true;
+  rebuild(); mark(hist.length>0 ? hist[hist.length-1] : null);
+  lobby(false); ui(); updateTimerDisplay(); startClock();
+
   const myPresenceRef=roomRef.child('presence/'+myPlayerId);
   myPresenceRef.set(true);myPresenceRef.onDisconnect().remove();
-  roomRef.child('surrender').onDisconnect().set(myPlayerId);
+  
   if(db&&auth&&auth.currentUser){try{db.ref('users/'+myPlayerId+'/inMatch').set(roomId);db.ref('users/'+myPlayerId+'/inMatch').onDisconnect().remove();}catch(e){}}
-  roomRef.child('presence').on('value',snap=>{
-    if(over||!isOnline)return;
-    const pres=snap.val()||{};
-    const keys=Object.keys(pres);
-    const oppPresent=keys.some(k=>k!==myPlayerId);
-    if(!oppPresent&&hist.length>0){
-      if(!disconnectTimer){disconnectTimer=setTimeout(()=>{if(!over&&isOnline){roomRef.child('surrender').set('opp_disconnected');finish('surrender',myColor);}},6000);}
-    }else{if(disconnectTimer){clearTimeout(disconnectTimer);disconnectTimer=null;}}
-  });
+
   roomRef.child('move').on('value',snap=>{
     const moveData=snap.val();if(!moveData||over)return;
     if(moveData.by!==myPlayerId&&moveData.step===hist.length+1){executePlay(moveData.m,true,moveData.clock);}
@@ -2354,22 +2374,6 @@ function joinFirebaseRoom(roomId){
     if(typeof val==='object'&&val.loserColor!==undefined){finish('timeout',1-val.loserColor);}
     else if(val!==myPlayerId){finish('timeout',myColor);}
   });
-  setTimeout(()=>{
-    if(over||!isOnline||hist.length>0)return;
-    roomRef.child('presence').once('value',snap=>{
-      if(over||!isOnline||hist.length>0)return;
-      const pres=snap.val()||{};
-      const oppPresent=Object.keys(pres).some(k=>k!==myPlayerId);
-      if(!oppPresent){
-        console.log('[Room] Opponent missing after 8s, back to queue');
-        cleanupRoomListeners();
-        isOnline=false;roomRef=null;currentRoomId=null;
-        cancelMatch(true);
-        switchScreen('online');
-        findMatch();
-      }
-    });
-  },8000);
 }
 
 /* ===== AUTH UI ===== */
@@ -2415,8 +2419,25 @@ if(initFirebase()&&auth){
       }
       if(user.displayName&&(S.name==='Kỳ thủ'||!S.name)){S.name=user.displayName;if(user.photoURL)S.avatar=user.photoURL;save();}
       updateDBProfile();listenChallenges();lob();
-      listenFriends(); // Lắng nghe danh sách bạn
-      listenFriendRequests(); // Lắng nghe lời mời kết bạn
+      listenFriends();
+      listenFriendRequests();
+      
+      // Khôi phục phòng cũ nếu có
+      const savedRoom = localStorage.getItem('currentRoomId');
+      if(savedRoom){
+        db.ref('rooms/'+savedRoom).once('value', snap=>{
+          if(snap.exists()){
+            const room = snap.val();
+            myColor = (room.player1 === myPlayerId) ? 1 : 0;
+            const oppUid = (myColor === 1) ? room.player2 : room.player1;
+            loadOpponentInfo(oppUid, myColor===1 ? '將' : '帥').then(()=>{
+              joinFirebaseRoom(savedRoom);
+            });
+          }else{
+            localStorage.removeItem('currentRoomId');
+          }
+        });
+      }
     }else{
       icon.innerHTML='<path d="M10 4H5v16h5M14 8l5 4-5 4M19 12H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
       btn.setAttribute('aria-label','Đăng nhập');
@@ -2447,4 +2468,4 @@ try{
 }catch(err){console.error(err);}
 </script>
 </body>
-</html>
+  </html>
