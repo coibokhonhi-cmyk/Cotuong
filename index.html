@@ -1,43 +1,3 @@
-<!doctype html>
-<html lang="vi">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-body {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  padding: 24px;
-}
-
-.card {
-  max-width: 520px;
-  padding: 18px;
-  border-radius: 16px;
-  border: 1px solid rgba(0, 33, 71, 0.16);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
-}
-
-h2 {
-  margin: 0 0 10px;
-  color: #002147;
-}
-
-p {
-  margin: 0 0 14px;
-  line-height: 1.6;
-}
-
-button {
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 33, 71, 0.2);
-  background: #DAA520;
-  color: #ffffff;
-  cursor: pointer;
-}
-  </style>
-</head>
-<body>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -90,6 +50,7 @@ body{--w:min(100vw - 16px,720px,calc((100dvh - 236px)*.9));display:flex;flex-dir
 .cap-text{position:absolute;translate:-50% -50%;font:900 11cqw/1 KaiTi,STKaiti,"Kaiti SC",serif;color:#c4161c;-webkit-text-stroke:.3cqw #3a0000;text-shadow:0 0 2cqw #ff2020,0 0 4cqw #ff0000;z-index:25;pointer-events:none;animation:capPop .8s cubic-bezier(.15,.85,.25,1) forwards;will-change:transform,opacity}
 @keyframes capPop{0%{opacity:0;transform:scale(0.3) rotate(-15deg)}30%{opacity:1;transform:scale(1.2) rotate(5deg)}100%{opacity:0;transform:translateY(-8cqw) scale(0.9) rotate(0deg)}}
 body.flipped #bd{rotate:180deg}
+body.flipped #end{rotate:180deg}
 body.flipped .p, body.flipped .check-char, body.flipped .check-char-double, body.flipped .trạm-char, body.flipped .cap-text, body.flipped .trạm-seal{rotate:180deg}
 body.flipped .p.dead{rotate:210deg}
 #end{position:absolute;inset:0;z-index:20;display:grid;place-content:center;justify-items:center;gap:2cqw;text-align:center;background:#1a0d04d0;font-size:4.5cqw;animation:drop .4s backwards;padding:12px}
@@ -552,7 +513,7 @@ body.friendly-match #friendly-banner{display:block}
   <button id="new">Ván mới</button>
   <button id="undo">Đi lại</button>
   <button id="home">Sảnh</button>
-</div><script>
+                                                                                                                                                                                                 </div><script>
 var XiangqiEngine = (function () {
   'use strict';
   const RED=1,BLACK=-1;
@@ -1172,7 +1133,7 @@ var XiangqiEngine = (function () {
     RED,BLACK,MATE,MATE_TH
   };
 })();
-</script><script>
+  </script><script>
 const $=s=>document.querySelector(s),sleep=t=>new Promise(r=>setTimeout(r,t)),bd=$('#bd');
 const INIT=['rheakaehr','.........','.c.....c.','p.p.p.p.p','.........','.........','P.P.P.P.P','.C.....C.','.........','RHEAKAEHR'];
 const NAME={k:'將帥',a:'士仕',e:'象相',h:'馬馬',r:'車車',c:'砲炮',p:'卒兵'};
@@ -1192,6 +1153,7 @@ let oppName='Đối thủ',oppAvatar='將',opponentPts=0,oppW=0,oppL=0;
 let matchPollTimer=null;
 let isSearching=false;
 let pollInFlight=false;
+let pendingFriendReq = null; // Biến lưu lời mời kết bạn đang chờ xử lý
 
 const LV=['Dễ','Thường','Khó','Siêu Khó'];
 const RANKS=[
@@ -1330,7 +1292,7 @@ function sfx(k){
   }catch(e){}
 }
 
-/* ===== LUẬT CỜ ===== */
+/* ===== LUẬT CỜ (app-side) ===== */
 const V={k:100,r:9,c:4.5,h:4,e:2,a:2,p:1};
 const genMain=(b,s)=>{
   const m=[];
@@ -1994,7 +1956,7 @@ $('#save-profile').onclick=()=>{
   sfx('sel');S.name=$('#name-input').value.trim()||'Kỳ thủ';S.avatar=tempAvatar;save();updateDBProfile();lob();ui();$('#profile-modal').classList.remove('open');
 };
 
-/* ===== BẠN BÈ ===== */
+/* ===== BẠN BÈ (SỬA LỖI GỬI/NHẬN LỜI MỜI) ===== */
 async function renderFriends(){
   const flist=$('#friend-list');
   if(!S.friends||Object.keys(S.friends).length===0){
@@ -2033,6 +1995,7 @@ async function renderFriends(){
     flist.appendChild(item);
   }
 }
+
 $('#btn-add-friend').onclick=async()=>{
   if(!ensureDb())return;
   sfx('sel');let fid=$('#friend-id-input').value.trim();
@@ -2041,15 +2004,89 @@ $('#btn-add-friend').onclick=async()=>{
   let snap=await db.ref('players/'+fid).once('value');
   let fuid=snap.val();
   if(!fuid)return alert("Không tìm thấy người chơi có ID này!");
-  let fsnap=await db.ref('users/'+fuid).once('value');
-  let fdata=fsnap.val();
-  if(fdata){
-    if(!S.friends)S.friends={};
-    S.friends[fuid]={id:fdata.id,name:fdata.name,avatar:fdata.avatar,pts:fdata.pts||0};
-    save();updateDBProfile();renderFriends();$('#friend-id-input').value='';
-    alert("Đã thêm "+fdata.name+" vào danh sách bạn bè!");
-  }
+  if(fuid===myPlayerId)return alert("Không thể tự kết bạn với chính mình!");
+  if(S.friends&&S.friends[fuid])return alert("Hai bạn đã là bạn bè rồi!");
+  
+  const existReq=await db.ref('friend_requests/'+fuid+'/'+myPlayerId).once('value');
+  if(existReq.exists())return alert("Bạn đã gửi lời mời rồi, chờ đối phương đồng ý nhé!");
+  
+  await db.ref('friend_requests/'+fuid+'/'+myPlayerId).set({
+    id:S.id,name:S.name,avatar:S.avatar,pts:S.pts,t:Date.now()
+  });
+  $('#friend-id-input').value='';
+  alert("✅ Đã gửi lời mời kết bạn thành công!\nVui lòng chờ đối phương xác nhận.");
 };
+
+// Tự động lắng nghe danh sách bạn bè
+function listenFriends(){
+  if(!db||!myPlayerId)return;
+  db.ref('users/'+myPlayerId+'/friends').on('value',snap=>{
+    const fData=snap.val();
+    if(fData){
+      S.friends=fData;
+      try{localStorage.setItem('cotuong',JSON.stringify(S))}catch(e){}
+      if(document.getElementById('friend-modal').classList.contains('open'))renderFriends();
+    }
+  });
+}
+
+// Tự động lắng nghe lời mời kết bạn
+function listenFriendRequests(){
+  if(!db||!myPlayerId)return;
+  
+  if(!document.getElementById('friend-req-modal')){
+    document.body.insertAdjacentHTML('beforeend', `
+    <div id="friend-req-modal" class="modal-overlay">
+      <div class="m-panel" style="border-color:#e6c36e">
+        <h2>LỜI MỜI KẾT BẠN</h2>
+        <div id="friend-req-content" style="margin:20px 0;color:#fff;font-size:15px;line-height:1.5"></div>
+        <div style="display:flex;gap:10px">
+          <button class="auth-btn" id="btn-accept-friend" style="background:#e6c36e;color:#000">Đồng Ý</button>
+          <button class="auth-btn" id="btn-decline-friend" style="background:transparent;border:1px solid #444;color:#aaa">Từ Chối</button>
+        </div>
+      </div>
+    </div>`);
+    
+    // Nút Đồng Ý
+    $('#btn-accept-friend').onclick=async()=>{
+      if(!pendingFriendReq)return;
+      const req=pendingFriendReq;
+      $('#btn-accept-friend').textContent='Đang xử lý...';
+      try{
+        await db.ref('users/'+myPlayerId+'/friends/'+req.uid).set({id:req.id,name:req.name,avatar:req.avatar,pts:req.pts});
+        await db.ref('users/'+req.uid+'/friends/'+myPlayerId).set({id:S.id,name:S.name,avatar:S.avatar,pts:S.pts});
+        await db.ref('friend_requests/'+myPlayerId+'/'+req.uid).remove();
+        $('#friend-req-modal').classList.remove('open');
+      }catch(e){
+        alert("Lỗi: "+e.message);
+      }
+      $('#btn-accept-friend').textContent='Đồng Ý';
+      pendingFriendReq=null;
+    };
+
+    // Nút Từ Chối
+    $('#btn-decline-friend').onclick=async()=>{
+      if(!pendingFriendReq)return;
+      const req=pendingFriendReq;
+      await db.ref('friend_requests/'+myPlayerId+'/'+req.uid).remove();
+      $('#friend-req-modal').classList.remove('open');
+      pendingFriendReq=null;
+    };
+  }
+
+  db.ref('friend_requests/'+myPlayerId).on('child_added',snap=>{
+    const fromUid=snap.key;
+    const req=snap.val();
+    if(!req)return;
+    if(pendingFriendReq)return; // Đang hiện 1 cái rồi thì bỏ qua cái khác (tránh spam)
+    
+    pendingFriendReq={uid:fromUid, ...req};
+    $('#friend-req-content').innerHTML=`<b>${req.name}</b> (ID: ${req.id})<br>muốn kết bạn với bạn!`;
+    $('#friend-req-modal').classList.add('open');
+    sfx('check'); // Âm thanh thông báo
+  });
+}
+
 function sendChallenge(fuid,fname){
   sfx('sel');
   $('#friend-modal').classList.remove('open');$('#wait-modal').classList.add('open');
@@ -2103,14 +2140,14 @@ $('#btn-accept-chal').onclick=()=>{
 };
 $('#btn-decline-chal').onclick=()=>{sfx('sel');if(db)db.ref('challenges/'+myPlayerId).update({status:'declined'});$('#incoming-modal').classList.remove('open');};
 
-/* ===== MATCHMAKING MỚI (POLLING 500ms + UID-BASED) ===== */
+/* ===== MATCHMAKING (ĐÃ FIX POLLING) ===== */
 function cancelMatch(silent=false){
   if(!silent)sfx('sel');
   isSearching=false;
   pollInFlight=false;
   if(matchPollTimer){clearInterval(matchPollTimer);matchPollTimer=null;}
-  if(matchRef&&myPlayerId&&auth&&auth.currentUser){
-    try{matchRef.child(myPlayerId).onDisconnect().cancel();matchRef.child(myPlayerId).remove();}catch(e){}
+  if(db&&myPlayerId&&auth&&auth.currentUser){
+    try{db.ref('matchmaking/'+myPlayerId).onDisconnect().cancel();db.ref('matchmaking/'+myPlayerId).remove();}catch(e){}
   }
   const btnFind=$('#btn-find-match');if(btnFind)btnFind.style.display='block';
   const status=$('#match-status');if(status)status.textContent='Sẵn sàng tìm trận';
@@ -2127,120 +2164,107 @@ async function loadOpponentInfo(uid,defaultAv){
 async function findMatch(){
   if(!auth||!auth.currentUser)return;
   myPlayerId=auth.currentUser.uid;
-  const myT=Date.now();
-
+  
   if(matchPollTimer){clearInterval(matchPollTimer);matchPollTimer=null;}
   pollInFlight=false;
   isSearching=true;
-
+  
+  console.log('[Match] Start. uid='+myPlayerId.substring(0,8));
   $('#match-status').textContent='ĐANG TÌM ĐỐI THỦ...';
-  console.log('[Match] Start. myT='+myT+' uid='+myPlayerId.substring(0,8));
-
+  
   try{
-    await matchRef.child(myPlayerId).set({t:myT,pts:S.pts,matched:false});
-    matchRef.child(myPlayerId).onDisconnect().remove();
-  }catch(e){console.error('[Match] Set failed:',e);return;}
-
+    await db.ref('matchmaking/'+myPlayerId).set({t:Date.now(),pts:S.pts,matched:false});
+    db.ref('matchmaking/'+myPlayerId).onDisconnect().remove();
+  }catch(e){
+    console.error('[Match] Set failed:',e);
+    return;
+  }
+  
   const pollOnce=async()=>{
     if(!isSearching||pollInFlight)return;
     pollInFlight=true;
     try{
-      const snap=await matchRef.once('value');
+      const snap=await db.ref('matchmaking').once('value');
       const all=snap.val()||{};
       const now=Date.now();
-
-      // Dọn node rác > 10s
+      
+      // Dọn node rác
       for(const uid in all){
         if(uid===myPlayerId)continue;
-        if(!all[uid]||!all[uid].t)continue;
-        if(now-all[uid].t>10000){matchRef.child(uid).remove().catch(()=>{});}
+        const p=all[uid];
+        if(!p)continue;
+        if(!p.t||now-p.t>10000){
+          db.ref('matchmaking/'+uid).remove().catch(()=>{});
+        }
       }
-
+      
       const myNode=all[myPlayerId];
-      if(!myNode){pollInFlight=false;return;}
-
-      // === CASE 1: Bị claim → vào room ===
-      if(myNode.matched&&myNode.roomId&&myNode.opponent){
+      if(!myNode||!myNode.t){
+        if(isSearching){
+          try{await db.ref('matchmaking/'+myPlayerId).set({t:now,pts:S.pts,matched:false});}catch(e){}
+        }
+        pollInFlight=false;return;
+      }
+      
+      if(myNode.matched&&myNode.roomId){
+        // BỊ CLAIM
         isSearching=false;
         if(matchPollTimer){clearInterval(matchPollTimer);matchPollTimer=null;}
-        matchRef.child(myPlayerId).onDisconnect().cancel();
-
         const roomId=myNode.roomId;
         const oppUid=myNode.opponent;
         const iAmPlayer1=myPlayerId<oppUid;
         myColor=iAmPlayer1?1:0;
-
-        matchRef.child(myPlayerId).remove().catch(()=>{});
-        currentRoomId=roomId;
-        console.log('[Match] I was claimed. room='+roomId+' myColor='+myColor);
+        try{
+          db.ref('matchmaking/'+myPlayerId).onDisconnect().cancel();
+          db.ref('matchmaking/'+myPlayerId).remove();
+        }catch(e){}
+        console.log('[Match] Claimed. room='+roomId+' myColor='+myColor);
         pollInFlight=false;
         await loadOpponentInfo(oppUid,iAmPlayer1?'將':'帥');
         joinFirebaseRoom(roomId);
         return;
       }
-
-      // === CASE 2: Thử claim — CHỈ UID NHỎ HƠN CLAIM ===
-      const candidates=[];
+      
+      const others=[];
       for(const uid in all){
         if(uid===myPlayerId)continue;
         const p=all[uid];
         if(!p||p.matched)continue;
         if(!p.t||now-p.t>10000)continue;
-        if(myPlayerId>uid)continue; // CHỈ UID NHỎ claim UID LỚN
-        candidates.push({uid,t:p.t});
+        others.push(uid);
       }
-
-      if(candidates.length===0){pollInFlight=false;return;}
-      candidates.sort((a,b)=>a.t-b.t);
-      const opp=candidates[0];
-      const roomId='room_'+[myPlayerId,opp.uid].sort().join('_');
-
-      try{
-        const result=await matchRef.child(opp.uid).transaction(they=>{
-          if(!they||they.matched)return;
-          they.matched=true;
-          they.roomId=roomId;
-          they.opponent=myPlayerId;
-          return they;
-        });
-
-        if(!result.committed){pollInFlight=false;return;}
-
-        // Claim thành công → khoá state
+      if(!others.length){pollInFlight=false;return;}
+      others.sort();
+      const oppUid=others[0];
+      const roomId=[myPlayerId,oppUid].sort().join('_');
+      
+      if(myPlayerId<oppUid){
+        // TÔI LÀ OWNER
+        console.log('[Match] Owner. room='+roomId+' opp='+oppUid.substring(0,8));
+        await db.ref('rooms/'+roomId).set({player1:myPlayerId,player2:oppUid,turn:1,createdAt:Date.now()});
+        await db.ref('matchmaking/'+oppUid).update({matched:true,roomId:roomId,opponent:myPlayerId});
+        try{
+          db.ref('matchmaking/'+myPlayerId).onDisconnect().cancel();
+          await db.ref('matchmaking/'+myPlayerId).remove();
+        }catch(e){}
         isSearching=false;
         if(matchPollTimer){clearInterval(matchPollTimer);matchPollTimer=null;}
-        matchRef.child(myPlayerId).onDisconnect().cancel();
-
-        await matchRef.child(myPlayerId).update({
-          matched:true,
-          roomId:roomId,
-          opponent:opp.uid
-        });
-
-        await db.ref('rooms/'+roomId).set({
-          player1:myPlayerId,
-          player2:opp.uid,
-          turn:1,
-          createdAt:Date.now()
-        });
-
-        matchRef.child(myPlayerId).remove().catch(()=>{});
-        currentRoomId=roomId;
         myColor=1;
-        console.log('[Match] Claimed. room='+roomId+' opponent='+opp.uid.substring(0,8));
         pollInFlight=false;
-        await loadOpponentInfo(opp.uid,'將');
+        await loadOpponentInfo(oppUid,'將');
         joinFirebaseRoom(roomId);
         return;
-      }catch(e){
-        console.error('[Match] Transaction failed:',e);
+      } else {
+        // TÔI LÀ WAITER
+        console.log('[Match] Waiter. waiting for '+oppUid.substring(0,8));
+        pollInFlight=false;
       }
     }catch(e){
       console.error('[Match] Poll error:',e);
+      pollInFlight=false;
     }
-    pollInFlight=false;
   };
-
+  
   matchPollTimer=setInterval(pollOnce,500);
   pollOnce();
 }
@@ -2330,7 +2354,6 @@ function joinFirebaseRoom(roomId){
     if(typeof val==='object'&&val.loserColor!==undefined){finish('timeout',1-val.loserColor);}
     else if(val!==myPlayerId){finish('timeout',myColor);}
   });
-  // GHOST TIMEOUT: 8 giây — đủ để cả 2 join
   setTimeout(()=>{
     if(over||!isOnline||hist.length>0)return;
     roomRef.child('presence').once('value',snap=>{
@@ -2392,6 +2415,8 @@ if(initFirebase()&&auth){
       }
       if(user.displayName&&(S.name==='Kỳ thủ'||!S.name)){S.name=user.displayName;if(user.photoURL)S.avatar=user.photoURL;save();}
       updateDBProfile();listenChallenges();lob();
+      listenFriends(); // Lắng nghe danh sách bạn
+      listenFriendRequests(); // Lắng nghe lời mời kết bạn
     }else{
       icon.innerHTML='<path d="M10 4H5v16h5M14 8l5 4-5 4M19 12H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
       btn.setAttribute('aria-label','Đăng nhập');
@@ -2421,17 +2446,5 @@ try{
   })();
 }catch(err){console.error(err);}
 </script>
-</body>
-</html>
-
-  <script>
-try {
-document.getElementById("btn").addEventListener("click", () => {
-  alert("Nice! JavaScript đang chạy trong Preview iframe ✅");
-});
-} catch (error) {
-  console.error(error);
-}
-  </script>
 </body>
 </html>
