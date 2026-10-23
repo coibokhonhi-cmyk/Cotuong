@@ -1,3 +1,43 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+body {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 24px;
+}
+
+.card {
+  max-width: 520px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 33, 71, 0.16);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+  margin: 0 0 10px;
+  color: #002147;
+}
+
+p {
+  margin: 0 0 14px;
+  line-height: 1.6;
+}
+
+button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 33, 71, 0.2);
+  background: #DAA520;
+  color: #ffffff;
+  cursor: pointer;
+}
+  </style>
+</head>
+<body>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -15,6 +55,8 @@
 :root{--bg:#14171a;--bg2:#0d0f11;--gold:#d4af37;--gold-dim:#a68a2b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html,body{height:100%;margin:0}
 body{--w:min(100vw - 16px,720px,calc((100dvh - 236px)*.9));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;overflow:hidden;color:#e2e8f0;background:#0a0a0c;font:600 15px system-ui,"Segoe UI",Roboto,sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+/* F1: thêm wrapper để flip cả cụm banner + bàn cờ */
+#play-area{display:flex;flex-direction:column;align-items:center;gap:6px}
 .pl{width:calc(var(--w) + 14px);box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:14px;background:linear-gradient(#6a4220,#3d2412);border:2px solid #b8873b;transition:border-color .3s,box-shadow .3s}
 .pl.on{border-color:var(--gold);box-shadow:0 0 14px rgba(212,175,55,.4)}
 .pl.on::after{content:"●";margin-left:4px;font-size:11px;color:var(--gold);animation:pulse 1.2s infinite}
@@ -50,6 +92,8 @@ body{--w:min(100vw - 16px,720px,calc((100dvh - 236px)*.9));display:flex;flex-dir
 .cap-text{position:absolute;translate:-50% -50%;font:900 11cqw/1 KaiTi,STKaiti,"Kaiti SC",serif;color:#c4161c;-webkit-text-stroke:.3cqw #3a0000;text-shadow:0 0 2cqw #ff2020,0 0 4cqw #ff0000;z-index:25;pointer-events:none;animation:capPop .8s cubic-bezier(.15,.85,.25,1) forwards;will-change:transform,opacity}
 @keyframes capPop{0%{opacity:0;transform:scale(0.3) rotate(-15deg)}30%{opacity:1;transform:scale(1.2) rotate(5deg)}100%{opacity:0;transform:translateY(-8cqw) scale(0.9) rotate(0deg)}}
 body.flipped #bd{rotate:180deg}
+/* F1: flip cụm banner + bàn cờ cùng chiều (quân mình + banner mình đều ở dưới) */
+body.flipped #play-area{flex-direction:column-reverse}
 body.flipped #end{transform:rotate(180deg) !important;}
 body.flipped .p, body.flipped .check-char, body.flipped .check-char-double, body.flipped .trạm-char, body.flipped .cap-text, body.flipped .trạm-seal{rotate:180deg}
 body.flipped .p.dead{rotate:210deg}
@@ -339,8 +383,7 @@ body.friendly-match #friendly-banner{display:block}
 .sm-frame-r5{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #FFD700,0 0 12px rgba(255,215,0,0.75) !important}
 .sm-frame-r6{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #FFFFFF,0 0 12px rgba(155,89,182,0.85) !important}
 @media (max-width:360px){.lb-hero-avatar{width:100px;height:100px;font-size:46px}.lb-hero-name{font-size:18px}.lb-btn-main{font-size:17px;padding:14px 16px}.lb-icon-btn-card{padding:10px 4px}.lb-icon-btn-card .ib-ic{font-size:22px}}
-</style>
-</head><body>
+   </style></head><body>
 
 <div id="net-banner">⚠️ Mất kết nối máy chủ! Đang tự động kết nối lại...</div>
 <div id="spectator-bar"><span>👁️ Đang xem: <b id="spec-host-name">...</b></span><button id="spec-exit">Thoát</button></div>
@@ -505,16 +548,19 @@ body.friendly-match #friendly-banner{display:block}
   </div>
 </div>
 
-<div class="pl" id="t0">
-  <div id="t0-info" style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;min-width:0;padding:2px 0;"><div class="av" id="av0" style="color:#1b1b1b;flex-shrink:0;">將</div><div id="n0" style="display:flex;flex-direction:column;line-height:1.2;overflow:hidden;"></div></div>
-  <div class="tmw"><div class="tmrow"><span class="pmv" id="pmv0">60s</span><span class="tm" id="tm0">15:00</span></div><div class="tmb"><u id="tmb0"></u></div></div>
-</div>
+<!-- F2: Bọc #t0, #bw, #t1 vào #play-area để flip CẢ CỤM (banner + bàn cờ) cùng lúc -->
+<div id="play-area">
+  <div class="pl" id="t0">
+    <div id="t0-info" style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;min-width:0;padding:2px 0;"><div class="av" id="av0" style="color:#1b1b1b;flex-shrink:0;">將</div><div id="n0" style="display:flex;flex-direction:column;line-height:1.2;overflow:hidden;"></div></div>
+    <div class="tmw"><div class="tmrow"><span class="pmv" id="pmv0">60s</span><span class="tm" id="tm0">15:00</span></div><div class="tmb"><u id="tmb0"></u></div></div>
+  </div>
 
-<div id="bw"><div id="bd"><div id="end" hidden><h1></h1><div></div><button id="again" style="flex:none;padding:11px 28px">Ván mới</button><button id="home2" style="flex:none;padding:11px 28px">Về sảnh</button></div></div></div>
+  <div id="bw"><div id="bd"><div id="end" hidden><h1></h1><div></div><button id="again" style="flex:none;padding:11px 28px">Ván mới</button><button id="home2" style="flex:none;padding:11px 28px">Về sảnh</button></div></div></div>
 
-<div class="pl" id="t1">
-  <div id="t1-info" style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;min-width:0;padding:2px 0;"><div class="av" id="av1" style="color:#c4161c;flex-shrink:0;">帥</div><div id="n1" style="display:flex;flex-direction:column;line-height:1.2;overflow:hidden;"></div></div>
-  <div class="tmw"><div class="tmrow"><span class="pmv" id="pmv1">60s</span><span class="tm" id="tm1">15:00</span></div><div class="tmb"><u id="tmb1"></u></div></div>
+  <div class="pl" id="t1">
+    <div id="t1-info" style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;min-width:0;padding:2px 0;"><div class="av" id="av1" style="color:#c4161c;flex-shrink:0;">帥</div><div id="n1" style="display:flex;flex-direction:column;line-height:1.2;overflow:hidden;"></div></div>
+    <div class="tmw"><div class="tmrow"><span class="pmv" id="pmv1">60s</span><span class="tm" id="tm1">15:00</span></div><div class="tmb"><u id="tmb1"></u></div></div>
+  </div>
 </div>
 
 <div id="friendly-banner">⚔️ GIAO HỮU — KHÔNG TÍNH RANK</div>
@@ -524,7 +570,7 @@ body.friendly-match #friendly-banner{display:block}
   <button id="new">Ván mới</button>
   <button id="undo">Đi lại</button>
   <button id="home">Sảnh</button>
-  </div><script>
+</div><script>
 var XiangqiEngine = (function () {
   'use strict';
   const RED=1,BLACK=-1;
@@ -1144,7 +1190,7 @@ var XiangqiEngine = (function () {
     RED,BLACK,MATE,MATE_TH
   };
 })();
-  </script><script>
+</script><script>
 const $=s=>document.querySelector(s),sleep=t=>new Promise(r=>setTimeout(r,t)),bd=$('#bd');
 const INIT=['rheakaehr','.........','.c.....c.','p.p.p.p.p','.........','.........','P.P.P.P.P','.C.....C.','.........','RHEAKAEHR'];
 const NAME={k:'將帥',a:'士仕',e:'象相',h:'馬馬',r:'車車',c:'砲炮',p:'卒兵'};
@@ -1218,12 +1264,21 @@ function initFirebase(){
     db=firebase.database();
     auth=firebase.auth();
     matchRef=db.ref('matchmaking');
-    db.ref('.info/connected').on('value',snap=>{
-      isFirebaseConnected=!!snap.val();
-      const dot=document.getElementById('net-dot');
-      const banner=document.getElementById('net-banner');
-      if(dot)dot.classList.toggle('off',!isFirebaseConnected);
-      if(banner)banner.style.display=(!isFirebaseConnected&&isOnline&&!over)?'block':'none';
+    // F6: theo dõi kết nối + tự resync khi mạng có lại
+    let _wasConnected = true;
+    db.ref('.info/connected').on('value', snap => {
+      const wasConn = _wasConnected;
+      const nowConn = !!snap.val();
+      isFirebaseConnected = nowConn;
+      _wasConnected = nowConn;
+      const dot    = document.getElementById('net-dot');
+      const banner = document.getElementById('net-banner');
+      if (dot)    dot.classList.toggle('off', !nowConn);
+      if (banner) banner.style.display = (!nowConn && isOnline && !over) ? 'block' : 'none';
+      if (nowConn && !wasConn && isOnline && currentRoomId && !over) {
+        console.log('[Reconnect] Resyncing room', currentRoomId);
+        joinFirebaseRoom(currentRoomId);
+      }
     });
     console.log('[Firebase] Khởi tạo thành công — project:',cfg.projectId);
     firebaseInitError='';
@@ -1548,6 +1603,8 @@ function tick(){
   const now=performance.now();let dt=now-lastTick;lastTick=now;
   if(!$('#lobby').hidden)return;
   if(!isOnline&&dt>1000)dt=200;
+  // F3: mất mạng → đóng băng đồng hồ, sẽ đồng bộ lại khi reconnect
+  if(isOnline && !isFirebaseConnected) return;
   clock[turn]-=dt;pmv[turn]-=dt;
   if(isOnline){
     if(turn===myColor){
@@ -1672,10 +1729,17 @@ async function executePlay(m,isRemote=false,remoteClocks=null){
   const q_check=mk(B,m);const willCheck=chk(B,1-turn);un(B,m,q_check);
   const[r,c,x,y]=m,e=E[r][c],v=E[x][y];
   if(isOnline&&!isRemote&&roomRef){
-    const nextStep=hist.length+1;
-    roomRef.child('move').set({m:m,by:myPlayerId,step:nextStep,clock:[Math.round(clock[0]),Math.round(clock[1])]});
-    // Đã sửa: Lưu kèm clock để khôi phục ván cờ
-    roomRef.child('moveHistory/m'+nextStep).set({m:m,by:myPlayerId,step:nextStep,clock:[Math.round(clock[0]),Math.round(clock[1])]});
+    // F4: thêm timestamp để khôi phục đồng hồ chính xác khi reconnect
+    const nextStep = hist.length + 1;
+    const moveData = {
+      m: m,
+      by: myPlayerId,
+      step: nextStep,
+      clock: [Math.round(clock[0]), Math.round(clock[1])],
+      t: Date.now()
+    };
+    roomRef.child('move').set(moveData);
+    roomRef.child('moveHistory/m'+nextStep).set(moveData);
   }
   if(e){e.classList.add('fly');e.style.left=X(y)+'%';e.style.top=Y(x)+'%';await sleep(280);if(over){busy=false;return}e.classList.remove('fly');}
   if(v){
@@ -1710,68 +1774,7 @@ async function after(){
   if(over){stopClock();busy=false;await sleep(ck?3920:700);return finish(ck?'chk':'nomove',1-turn);}
   busy=false;
   if(!isOnline&&vsAI&&turn===0){triggerAI();}
-}
-
-function cleanupRoomListeners(){
-  if(disconnectTimer){clearTimeout(disconnectTimer);disconnectTimer=null;}
-  const banner=document.getElementById('net-banner');if(banner)banner.style.display='none';
-  if(roomRef){
-    try{
-      roomRef.child('surrender').onDisconnect().cancel();
-      roomRef.child('presence/'+myPlayerId).onDisconnect().cancel();
-      roomRef.child('presence/'+myPlayerId).remove();
-      roomRef.off();
-    }catch(e){}
   }
-  if(db&&auth&&auth.currentUser){try{db.ref('users/'+myPlayerId+'/inMatch').remove();}catch(e){}}
-}
-function finish(reason,explicitWinnerColor){
-  if(over&&!$('#end').hidden)return;
-  stopClock();over=true;busy=false;aiThinking=false;ui();updateTimerDisplay();
-  // Đã sửa: Không gọi cleanupRoomListeners() ở đây, tránh việc đối thủ thấy mình mất mạng
-  if(db&&auth&&auth.currentUser){try{db.ref('users/'+myPlayerId+'/inMatch').remove();}catch(e){}}
-  
-  const w=(explicitWinnerColor!==undefined)?explicitWinnerColor:(1-turn);
-  const e=$('#end');e.hidden=false;
-  let sub=reason==='timeout'?'Hết giờ':reason==='chk'?'Chiếu hết':reason==='surrender'?'Đối thủ đầu hàng / mất kết nối':'Hết nước đi';
-  if(isSpectating){
-    e.querySelector('h1').textContent=(w===1?'ĐỎ THẮNG!':'ĐEN THẮNG!');
-    sub=(specName1+' vs '+specName2+' — '+sub);
-    e.querySelector('div').textContent=sub;
-    return;
-  }
-  if(isOnline){
-    const isWin=(w===myColor);
-    e.querySelector('h1').textContent=isWin?'BẠN THẮNG!':'BẠN THUA!';
-    if(isRanked){
-      const myRank=getRankInfo(S.pts);
-      if(isWin){
-        S.winStreak=(S.winStreak||0)+1;S.lossStreak=0;
-        if(S.winStreak>(S.bestWinStreak||0))S.bestWinStreak=S.winStreak;
-        const base=(opponentPts>S.pts)?20:(opponentPts===S.pts?17:15);
-        const streakBonus=Math.max(0,(S.winStreak-1)*3);
-        const plus=base+streakBonus;
-        sub+=`. +${base} điểm Rank`;
-        if(streakBonus>0)sub+=` — 🔥 Chuỗi thắng ${S.winStreak}: +${streakBonus} bonus!`;
-        stat(1,plus);
-      }else{
-        S.lossStreak=(S.lossStreak||0)+1;S.winStreak=0;
-        const base=myRank.lossPoints;
-        const streakPenalty=Math.max(0,(S.lossStreak-1)*2);
-        const minus=base+streakPenalty;
-        sub+=`. -${base} điểm Rank`;
-        if(streakPenalty>0)sub+=` — ❄️ Chuỗi thua ${S.lossStreak}: -${streakPenalty} phạt!`;
-        stat(0,-minus);
-      }
-      save();
-    }else{sub+='. (Trận Giao Hữu — Không tính Rank)';}
-  }else{
-    e.querySelector('h1').textContent=vsAI?(w?'BẠN THẮNG!':'BẠN THUA!'):(w?'ĐỎ THẮNG!':'ĐEN THẮNG!');
-    if(vsAI){sub+='. (Trận Tập Luyện — Không tính Rank)';}else{sub+='. (Trận 2 Người — Không tính Rank)';}
-  }
-  e.querySelector('div').textContent=sub;
-}
-
 bd.addEventListener('pointerdown',ev=>{
   if(isSpectating||busy||over||(isOnline&&turn!==myColor)||(!isOnline&&vsAI&&turn!==1))return;
   const R=bd.getBoundingClientRect();
@@ -1849,7 +1852,8 @@ function lob(){
 function lobby(on){
   $('#lobby').hidden=!on;
   if(on){
-    localStorage.removeItem('currentRoomId'); // Xoá phòng khi về sảnh
+    localStorage.removeItem('currentRoomId');
+    currentRoomId = null; // F5: xoá room ID khi về sảnh
     currentAiRequestId++;aiThinking=false;busy=false;
     if(isOnline&&roomRef&&!over){try{roomRef.child('surrender').set(myPlayerId);}catch(e){}}
     if(isSpectating){
@@ -2332,6 +2336,19 @@ function exitSpectator(){
 async function joinFirebaseRoom(roomId){
   cleanupRoomListeners();
   currentRoomId=roomId;roomRef=db.ref('rooms/'+roomId);
+  
+  // F5: kiểm tra phòng còn tồn tại không
+  try {
+    const chk = await roomRef.once('value');
+    if (!chk.exists()) {
+      localStorage.removeItem('currentRoomId');
+      currentRoomId = null; roomRef = null;
+      alert('Trận đấu đã kết thúc hoặc không còn tồn tại.');
+      lobby(true);
+      return;
+    }
+  } catch(e) { console.warn('[Room] verify fail:', e); }
+  
   isOnline=true;vsAI=false;isSpectating=false;
   
   localStorage.setItem('currentRoomId', roomId);
@@ -2344,16 +2361,30 @@ async function joinFirebaseRoom(roomId){
   entries.forEach(e=>{ mk(B, e.m); hist.push(e.m); });
   turn = (hist.length % 2) ? 0 : 1;
   
-  if(entries.length > 0 && entries[entries.length-1].clock) {
-    clock = entries[entries.length-1].clock;
+  // F5: khôi phục clock + trừ thời gian đã trôi qua kể từ nước cuối
+  if (entries.length > 0 && entries[entries.length-1].clock) {
+    const last = entries[entries.length-1];
+    clock = last.clock.slice();
+    let elapsed = 0;
+    if (last.t) {
+      elapsed = Math.max(0, Date.now() - last.t);
+      clock[turn] = Math.max(0, clock[turn] - elapsed);
+    }
+    pmv[turn] = Math.max(0, PERMV - elapsed);
   } else {
-    clock = [TOTAL,TOTAL];
+    clock = [TOTAL, TOTAL];
+    pmv = [PERMV, PERMV];
   }
-  pmv = [PERMV,PERMV];
   
   $('#end').hidden=true;
   rebuild(); mark(hist.length>0 ? hist[hist.length-1] : null);
   lobby(false); ui(); updateTimerDisplay(); startClock();
+  
+  // F5: ván đã hết giờ trong lúc mất kết nối → xử lý luôn
+  if (clock[turn] <= 0 || pmv[turn] <= 0) {
+    finish('timeout', 1 - turn);
+    return;
+  }
 
   const myPresenceRef=roomRef.child('presence/'+myPlayerId);
   myPresenceRef.set(true);myPresenceRef.onDisconnect().remove();
