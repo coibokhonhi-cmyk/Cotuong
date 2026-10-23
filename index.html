@@ -38,6 +38,46 @@ button {
   </style>
 </head>
 <body>
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+body {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 24px;
+}
+
+.card {
+  max-width: 520px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 33, 71, 0.16);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+  margin: 0 0 10px;
+  color: #002147;
+}
+
+p {
+  margin: 0 0 14px;
+  line-height: 1.6;
+}
+
+button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 33, 71, 0.2);
+  background: #DAA520;
+  color: #ffffff;
+  cursor: pointer;
+}
+  </style>
+</head>
+<body>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -2139,13 +2179,13 @@ function listenChallenges(){
     }else{$('#incoming-modal').classList.remove('open');}
   });
 }
-$('#btn-accept-chal').onclick=()=>{
+$('#btn-accept-chal').onclick=async()=>{
   if(!ensureDb())return;
   sfx('sel');if(!incomingChallengeData)return;
   const roomId='friend_'+Date.now();
   myColor=1;
-  db.ref('rooms/'+roomId).set({player1:myPlayerId,player2:incomingChallengeData.from,turn:1,createdAt:Date.now()});
-  db.ref('challenges/'+myPlayerId).update({status:'accepted',roomId:roomId});
+  await db.ref('rooms/'+roomId).set({player1:myPlayerId,player2:incomingChallengeData.from,turn:1,createdAt:Date.now()});
+  await db.ref('challenges/'+myPlayerId).update({status:'accepted',roomId:roomId});
   $('#incoming-modal').classList.remove('open');
   isRanked=false;
   db.ref('users/'+incomingChallengeData.from).once('value',usnap=>{
@@ -2200,28 +2240,13 @@ async function findMatch(){
     if(!isSearching||pollInFlight)return;
     pollInFlight=true;
     try{
+      const now=Date.now();
       const snap=await db.ref('matchmaking').once('value');
       const all=snap.val()||{};
-      const now=Date.now();
-      
-      for(const uid in all){
-        if(uid===myPlayerId)continue;
-        const p=all[uid];
-        if(!p)continue;
-        if(!p.t||now-p.t>10000){
-          db.ref('matchmaking/'+uid).remove().catch(()=>{});
-        }
-      }
       
       const myNode=all[myPlayerId];
-      if(!myNode||!myNode.t){
-        if(isSearching){
-          try{await db.ref('matchmaking/'+myPlayerId).set({t:now,pts:S.pts,matched:false});}catch(e){}
-        }
-        pollInFlight=false;return;
-      }
       
-      if(myNode.matched&&myNode.roomId){
+      if(myNode&&myNode.matched&&myNode.roomId){
         isSearching=false;
         if(matchPollTimer){clearInterval(matchPollTimer);matchPollTimer=null;}
         const roomId=myNode.roomId;
@@ -2230,7 +2255,7 @@ async function findMatch(){
         myColor=iAmPlayer1?1:0;
         try{
           db.ref('matchmaking/'+myPlayerId).onDisconnect().cancel();
-          db.ref('matchmaking/'+myPlayerId).remove();
+          await db.ref('matchmaking/'+myPlayerId).remove();
         }catch(e){}
         console.log('[Match] Claimed. room='+roomId+' myColor='+myColor);
         pollInFlight=false;
@@ -2239,12 +2264,30 @@ async function findMatch(){
         return;
       }
       
+      if(!myNode||!myNode.t){
+        if(isSearching){
+          try{await db.ref('matchmaking/'+myPlayerId).set({t:now,pts:S.pts,matched:false});}catch(e){}
+        }
+        pollInFlight=false;return;
+      }else if(now-(myNode.t||0)>4000){
+        try{await db.ref('matchmaking/'+myPlayerId+'/t').set(now);}catch(e){}
+      }
+      
+      for(const uid in all){
+        if(uid===myPlayerId)continue;
+        const p=all[uid];
+        if(!p)continue;
+        if(!p.matched&&(!p.t||now-p.t>15000)){
+          db.ref('matchmaking/'+uid).remove().catch(()=>{});
+        }
+      }
+      
       const others=[];
       for(const uid in all){
         if(uid===myPlayerId)continue;
         const p=all[uid];
         if(!p||p.matched)continue;
-        if(!p.t||now-p.t>10000)continue;
+        if(!p.t||now-p.t>15000)continue;
         others.push(uid);
       }
       if(!others.length){pollInFlight=false;return;}
@@ -2331,6 +2374,66 @@ function exitSpectator(){
   $('#spectator-bar').classList.remove('on');
   $('#undo').style.display='block';$('#new').style.display='block';
   lobby(true);
+}
+
+function cleanupRoomListeners(){
+  if(disconnectTimer){clearTimeout(disconnectTimer);disconnectTimer=null;}
+  if(roomRef){
+    try{
+      roomRef.child('move').off();
+      roomRef.child('surrender').off();
+      roomRef.child('timeout').off();
+      roomRef.child('presence/'+myPlayerId).onDisconnect().cancel();
+      roomRef.child('presence/'+myPlayerId).remove();
+    }catch(e){}
+  }
+  if(db&&auth&&auth.currentUser&&myPlayerId){
+    try{
+      db.ref('users/'+myPlayerId+'/inMatch').onDisconnect().cancel();
+      db.ref('users/'+myPlayerId+'/inMatch').remove();
+    }catch(e){}
+  }
+}
+
+function finish(reason,winner){
+  if(over)return;
+  over=true;
+  busy=false;
+  aiThinking=false;
+  stopClock();
+  localStorage.removeItem('currentRoomId');
+  const endEl=$('#end');
+  const h1=endEl.querySelector('h1');
+  const desc=endEl.querySelector('div');
+  let isWin=false;
+  if(isSpectating){
+    h1.textContent=winner===1?'ĐỎ THẮNG':'ĐEN THẮNG';
+    desc.textContent='Trận đấu đã kết thúc';
+  }else if(isOnline){
+    isWin=(winner===myColor);
+    h1.textContent=isWin?'THẮNG':'THUA';
+    const rText=reason==='timeout'?'Hết thời gian':(reason==='surrender'?'Đối thủ đầu hàng':'Chiếu bí');
+    if(isRanked){
+      const rInfo=getRankInfo(S.pts);
+      const ptsChange=isWin?25:-rInfo.lossPoints;
+      if(isWin){S.winStreak=(S.winStreak||0)+1;S.lossStreak=0;if(S.winStreak>(S.bestWinStreak||0))S.bestWinStreak=S.winStreak;}
+      else{S.lossStreak=(S.lossStreak||0)+1;S.winStreak=0;}
+      stat(isWin,ptsChange);
+      desc.textContent=`${rText} (${ptsChange>=0?'+'+ptsChange:ptsChange} điểm)`;
+    }else{
+      desc.textContent=`${rText} (Giao hữu)`;
+    }
+    cleanupRoomListeners();
+  }else if(vsAI){
+    isWin=(winner===1);
+    h1.textContent=isWin?'THẮNG':'THUA';
+    desc.textContent=reason==='timeout'?'Hết thời gian':'Chiếu bí';
+  }else{
+    h1.textContent=winner===1?'ĐỎ THẮNG':'ĐEN THẮNG';
+    desc.textContent=reason==='timeout'?'Hết thời gian':'Chiếu bí';
+  }
+  endEl.hidden=false;
+  ui();
 }
 
 async function joinFirebaseRoom(roomId){
@@ -2498,5 +2601,17 @@ try{
   })();
 }catch(err){console.error(err);}
 </script>
+</body>
+</html>
+
+  <script>
+try {
+document.getElementById("btn").addEventListener("click", () => {
+  alert("Nice! JavaScript đang chạy trong Preview iframe ✅");
+});
+} catch (error) {
+  console.error(error);
+}
+  </script>
 </body>
   </html>
