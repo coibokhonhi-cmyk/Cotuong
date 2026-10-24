@@ -78,6 +78,86 @@ button {
   </style>
 </head>
 <body>
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+body {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 24px;
+}
+
+.card {
+  max-width: 520px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 33, 71, 0.16);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+  margin: 0 0 10px;
+  color: #002147;
+}
+
+p {
+  margin: 0 0 14px;
+  line-height: 1.6;
+}
+
+button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 33, 71, 0.2);
+  background: #DAA520;
+  color: #ffffff;
+  cursor: pointer;
+}
+  </style>
+</head>
+<body>
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+body {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 24px;
+}
+
+.card {
+  max-width: 520px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 33, 71, 0.16);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+  margin: 0 0 10px;
+  color: #002147;
+}
+
+p {
+  margin: 0 0 14px;
+  line-height: 1.6;
+}
+
+button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 33, 71, 0.2);
+  background: #DAA520;
+  color: #ffffff;
+  cursor: pointer;
+}
+  </style>
+</head>
+<body>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -92,12 +172,12 @@ button {
 <script>if(typeof firebase==='undefined'||!firebase.auth)document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-auth.js"><\/script>');</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif:wght@400;600;700&display=swap">
 <style>
-:root{--bg:#14171a;--bg2:#0d0f11;--gold:#d4af37;--gold-dim:#a68a2b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#14171a;--bg2:#0d0f11;--gold:#d4af37;--gold-dim:#a68a2b;--flip-rot:0deg;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html,body{height:100%;margin:0}
 body{--w:min(100vw - 16px,720px,calc((100dvh - 236px)*.9));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;overflow:hidden;color:#e2e8f0;background:#0a0a0c;font:600 15px system-ui,"Segoe UI",Roboto,sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 /* F1: thêm wrapper để flip cả cụm banner + bàn cờ */
-#play-area{display:flex;flex-direction:column;align-items:center;gap:6px}
-.pl{width:calc(var(--w) + 14px);box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:14px;background:linear-gradient(#6a4220,#3d2412);border:2px solid #b8873b;transition:border-color .3s,box-shadow .3s}
+#play-area{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
+.pl{position:relative;width:calc(var(--w) + 14px);box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:14px;background:linear-gradient(#6a4220,#3d2412);border:2px solid #b8873b;transition:border-color .3s,box-shadow .3s}
 .pl.on{border-color:var(--gold);box-shadow:0 0 14px rgba(212,175,55,.4)}
 .pl.on::after{content:"●";margin-left:4px;font-size:11px;color:var(--gold);animation:pulse 1.2s infinite}
 .av{font:700 19px/32px KaiTi,STKaiti,"Kaiti SC",serif;width:32px;height:32px;border-radius:50%;text-align:center;background:#333;border:2px solid #555;box-shadow:0 2px 0 #000;flex:none;overflow:hidden;display:grid;place-items:center}
@@ -129,20 +209,38 @@ body{--w:min(100vw - 16px,720px,calc((100dvh - 236px)*.9));display:flex;flex-dir
 .hn{width:5%;aspect-ratio:1;background:rgba(0,0,0,0.15);border:0.35cqw solid var(--gold);box-shadow:0 0 0.8cqw var(--gold), inset 0 0 0.5cqw var(--gold);border-radius:50%;animation:drop .25s backwards}
 .hn.x{width:11.4%;background:none;border:.7cqw solid #ff4030;box-shadow:0 0 1.4cqw #f43}
 .fx{width:11%;aspect-ratio:1;border:.8cqw solid #ffe08a;animation:burst .5s forwards}
-.cap-text{position:absolute;translate:-50% -50%;font:900 11cqw/1 KaiTi,STKaiti,"Kaiti SC",serif;color:#c4161c;-webkit-text-stroke:.3cqw #3a0000;text-shadow:0 0 2cqw #ff2020,0 0 4cqw #ff0000;z-index:25;pointer-events:none;animation:capPop .8s cubic-bezier(.15,.85,.25,1) forwards;will-change:transform,opacity}
+.cap-text{position:absolute;translate:-50% -50%;rotate:var(--flip-rot,0deg);font:900 11cqw/1 KaiTi,STKaiti,"Kaiti SC",serif;color:#c4161c;-webkit-text-stroke:.3cqw #3a0000;text-shadow:0 0 2cqw #ff2020,0 0 4cqw #ff0000;z-index:25;pointer-events:none;animation:capPop .8s cubic-bezier(.15,.85,.25,1) forwards;will-change:transform,opacity}
 @keyframes capPop{0%{opacity:0;transform:scale(0.3) rotate(-15deg)}30%{opacity:1;transform:scale(1.2) rotate(5deg)}100%{opacity:0;transform:translateY(-8cqw) scale(0.9) rotate(0deg)}}
+body.flipped{--flip-rot:180deg}
 body.flipped #bd{rotate:180deg}
 /* F1: flip cụm banner + bàn cờ cùng chiều (quân mình + banner mình đều ở dưới) */
 body.flipped #play-area{flex-direction:column-reverse}
-body.flipped #end{transform:rotate(180deg) !important;}
-body.flipped .p, body.flipped .check-char, body.flipped .check-char-double, body.flipped .trạm-char, body.flipped .cap-text, body.flipped .trạm-seal{rotate:180deg}
+body.flipped #end, body.flipped #ready-overlay{transform:rotate(180deg) !important;}
+body.flipped .p{rotate:180deg}
 body.flipped .p.dead{rotate:210deg}
+body.flipped .trạm-seal{right:auto;top:auto;left:8%;bottom:8%}
 #end{position:absolute;inset:0;z-index:20;display:grid;place-content:center;justify-items:center;gap:2cqw;text-align:center;background:#1a0d04d0;font-size:4.5cqw;animation:drop .4s backwards;padding:12px}
 #end[hidden]{display:none}
 #end h1{margin:0;font:900 12cqw/1 KaiTi,STKaiti,serif;color:var(--gold);text-shadow:0 1cqw 2cqw #000}
-#bar{display:flex;gap:7px;width:calc(var(--w) + 14px)}
-#bar button{flex:1;padding:9px 2px;border:1px solid #555;border-radius:8px;background:linear-gradient(#333,#222);color:#ccc;font:700 14px system-ui,sans-serif;box-shadow:0 2px 0 #111;cursor:pointer;transition:all .2s}
+.end-btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:6px}
+.end-btns button{padding:9px 18px;border-radius:8px;border:1px solid var(--gold);background:linear-gradient(#6a4220,#3d2412);color:#fff;font:700 13px system-ui;cursor:pointer}
+.end-btns button.primary{background:linear-gradient(180deg,#b82222,#5a0a0a);border-color:#ffd24a}
+#ready-overlay{position:absolute;inset:0;z-index:19;display:grid;place-content:center;justify-items:center;gap:12px;text-align:center;background:rgba(10,5,5,0.82);backdrop-filter:blur(3px);padding:16px}
+#ready-overlay[hidden]{display:none}
+.ready-box{background:linear-gradient(135deg,#2b0b0b,#0a0202);border:2px solid var(--gold);border-radius:14px;padding:18px 22px;min-width:240px;box-shadow:0 0 30px rgba(0,0,0,0.8)}
+.ready-box h3{margin:0 0 10px;font:900 22px var(--kai,KaiTi,serif);color:var(--gold);letter-spacing:2px}
+.ready-status-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;font-size:13px;color:#eee}
+.ready-btn{width:100%;padding:11px 20px;border-radius:8px;border:2px solid #ffd24a;background:linear-gradient(180deg,#b82222,#5a0a0a);color:#fff;font:900 15px system-ui;cursor:pointer;letter-spacing:1px}
+.ready-btn:disabled{opacity:0.6;cursor:default;background:#333;border-color:#666}
+#bar{display:flex;gap:5px;width:calc(var(--w) + 14px);flex-wrap:nowrap}
+#bar button{flex:1;padding:9px 2px;border:1px solid #555;border-radius:8px;background:linear-gradient(#333,#222);color:#ccc;font:700 12px system-ui,sans-serif;box-shadow:0 2px 0 #111;cursor:pointer;transition:all .2s;position:relative;white-space:nowrap}
 #bar button:active{translate:0 2px;box-shadow:0 0 0 #111}
+.chat-badge{position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#ff3030;border:2px solid #111;display:none}
+.chat-bubble{position:absolute;left:50px;top:50%;transform:translateY(-50%);background:rgba(15,10,10,0.95);border:1.5px solid var(--gold);color:#fff;padding:5px 12px;border-radius:12px;font:600 12px system-ui;z-index:60;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 12px rgba(0,0,0,0.7);pointer-events:none;animation:fadeIn 0.2s}
+.quick-chat-grid{display:grid;grid-template-columns:1fr;gap:6px;max-height:190px;overflow-y:auto;margin-bottom:12px;text-align:left}
+.quick-chat-item{padding:9px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(212,175,55,0.3);border-radius:6px;color:#f6e9c8;font:600 13px system-ui;cursor:pointer;transition:background 0.15s}
+.quick-chat-item:active{background:rgba(212,175,55,0.25)}
+.chat-history-box{max-height:110px;overflow-y:auto;background:rgba(0,0,0,0.45);border:1px solid #333;border-radius:6px;padding:8px;margin-bottom:10px;text-align:left;font-size:12px;display:flex;flex-direction:column;gap:4px}
 @keyframes drop{from{opacity:0;scale:1.6}}
 @keyframes burst{from{scale:.3;opacity:1}to{scale:2.4;opacity:0}}
 @keyframes pulse{50%{opacity:.4}}
@@ -156,12 +254,12 @@ body.flipped .p.dead{rotate:210deg}
 @keyframes bdshake{20%,80%{translate:-.3px 0}45%,55%{translate:.5px .2px}65%{translate:-.6px -.3px}}
 #bd.shake2{will-change:translate;animation:bdshake2 .28s cubic-bezier(.36,.07,.19,.97)}
 @keyframes bdshake2{15%,85%{translate:-.6px 0}35%,65%{translate:1px .4px}50%{translate:-1.2px -.5px}}
-.check-char{position:absolute;left:50%;top:50%;translate:-50% -50%;font:900 40cqw/1 KaiTi,STKaiti,serif;color:#c4161c;-webkit-text-stroke:.8cqw #3a0000;text-shadow:0 0 3cqw #ff2020,0 0 8cqw #ff000088;z-index:8;pointer-events:none;animation:charfly .8s cubic-bezier(.15,.85,.25,1) forwards;will-change:transform,opacity}
+.check-char{position:absolute;left:50%;top:50%;translate:-50% -50%;rotate:var(--flip-rot,0deg);font:900 40cqw/1 KaiTi,STKaiti,serif;color:#c4161c;-webkit-text-stroke:.8cqw #3a0000;text-shadow:0 0 3cqw #ff2020,0 0 8cqw #ff000088;z-index:8;pointer-events:none;animation:charfly .8s cubic-bezier(.15,.85,.25,1) forwards;will-change:transform,opacity}
 @keyframes charfly{0%{transform:scale(2.8) rotate(-20deg);opacity:0}15%{opacity:1}25%{transform:scale(1.15) rotate(3deg)}35%{transform:scale(.95) rotate(-1deg)}45%{transform:scale(1) rotate(0);opacity:1}70%{transform:scale(1.05) rotate(0);opacity:1}100%{transform:scale(1.15) rotate(0);opacity:0}}
 .check-char.r{color:#ffd24a;text-shadow:0 0 3cqw #ffd24a,0 0 8cqw #ff8800}
 .check-char.h{color:#d4a574;text-shadow:0 0 3cqw #d4a574,0 0 8cqw #8b4513}
 .check-char.c{color:#ff6600;text-shadow:0 0 3cqw #ff6600,0 0 8cqw #ff0000}
-.check-char-double{position:absolute;left:50%;top:50%;translate:-50% -50%;font:900 22cqw/1 KaiTi,STKaiti,serif;z-index:8;pointer-events:none;white-space:nowrap;-webkit-text-stroke:.5cqw #3a0000;text-shadow:0 0 3cqw #ff2020,0 0 8cqw #ff000088;animation:charfly2 .8s cubic-bezier(.15,.85,.25,1) forwards;will-change:transform,opacity}
+.check-char-double{position:absolute;left:50%;top:50%;translate:-50% -50%;rotate:var(--flip-rot,0deg);font:900 22cqw/1 KaiTi,STKaiti,serif;z-index:8;pointer-events:none;white-space:nowrap;-webkit-text-stroke:.5cqw #3a0000;text-shadow:0 0 3cqw #ff2020,0 0 8cqw #ff000088;animation:charfly2 .8s cubic-bezier(.15,.85,.25,1) forwards;will-change:transform,opacity}
 .check-char-double span{display:inline-block;margin:0 1.2cqw}
 @keyframes charfly2{0%{transform:scale(2.4) rotate(-12deg);opacity:0}15%{opacity:1}25%{transform:scale(1.18) rotate(2deg)}35%{transform:scale(.93)}45%{transform:scale(1)}75%{opacity:1;transform:scale(1.02)}100%{transform:scale(1.1);opacity:0}}
 .clash-beam{position:absolute;left:50%;top:50%;translate:-50% -50%;width:130%;height:1.8cqw;background:linear-gradient(90deg,transparent,#fff8d0 20%,#ffffff 50%,#fff8d0 80%,transparent);box-shadow:0 0 3cqw var(--gold),0 0 7cqw #ffa500;z-index:10;pointer-events:none;animation:clash .5s ease-out forwards;will-change:transform,opacity}
@@ -194,15 +292,15 @@ body.flipped .p.dead{rotate:210deg}
 @keyframes trạmBlade{0%{opacity:0;scale:0 1}25%{opacity:1;scale:1 1}55%{opacity:1;scale:1 1}100%{opacity:0;scale:1 .08}}
 .trạm-ink{position:absolute;left:50%;top:50%;translate:-50% -50%;width:90cqw;aspect-ratio:1;background:radial-gradient(circle,#8b0000ff 0%,#5a0000dd 28%,#3a000088 55%,transparent 82%);z-index:14;pointer-events:none;animation:trạmInk 2.5s cubic-bezier(.2,.7,.3,1) forwards;will-change:transform,opacity}
 @keyframes trạmInk{0%{transform:scale(0);opacity:0}10%{opacity:1}100%{transform:scale(1.5);opacity:0}}
-.trạm-char{position:absolute;left:50%;top:50%;translate:-50% -50%;font:900 50cqw/1 KaiTi,STKaiti,serif;color:#c4161c;-webkit-text-stroke:.8cqw #3a0000;text-shadow:0 0 4cqw #ff0000,0 0 8cqw #ffaa00;z-index:15;pointer-events:none;white-space:nowrap;animation:trạmChar 3.1s cubic-bezier(.15,.85,.25,1) forwards;will-change:transform,opacity}
+.trạm-char{position:absolute;left:50%;top:50%;translate:-50% -50%;rotate:var(--flip-rot,0deg);font:900 50cqw/1 KaiTi,STKaiti,serif;color:#c4161c;-webkit-text-stroke:.8cqw #3a0000;text-shadow:0 0 4cqw #ff0000,0 0 8cqw #ffaa00;z-index:15;pointer-events:none;white-space:nowrap;animation:trạmChar 3.1s cubic-bezier(.15,.85,.25,1) forwards;will-change:transform,opacity}
 .trạm-char::before{content:'斬';position:absolute;inset:0;color:#ff0000;filter:blur(1.2cqw);z-index:-1;opacity:.55;pointer-events:none}
 @keyframes trạmChar{0%{transform:scale(2.6) rotate(-20deg);opacity:0}12%{opacity:1}25%{transform:scale(1.18) rotate(4deg)}35%{transform:scale(.92) rotate(-2deg)}45%{transform:scale(1) rotate(0);opacity:1}75%{opacity:1;transform:scale(1.05)}100%{transform:scale(1.25);opacity:0}}
-.trạm-seal{position:absolute;right:8%;top:8%;width:20%;aspect-ratio:1;display:grid;place-items:center;font:900 12cqw/1 KaiTi,STKaiti,serif;color:#c4161c;text-shadow:0 0 .3cqw #fff8;border:.6cqw solid #c4161c;border-radius:12%;background:radial-gradient(circle,#ffffff 0%,#fff9 60%,#c4161c22 100%);z-index:16;pointer-events:none;opacity:0;animation:trạmSeal 1.3s cubic-bezier(.7,.1,.3,1.2) .42s forwards;will-change:transform,opacity}
+.trạm-seal{position:absolute;right:8%;top:8%;rotate:var(--flip-rot,0deg);width:20%;aspect-ratio:1;display:grid;place-items:center;font:900 12cqw/1 KaiTi,STKaiti,serif;color:#c4161c;text-shadow:0 0 .3cqw #fff8;border:.6cqw solid #c4161c;border-radius:12%;background:radial-gradient(circle,#ffffff 0%,#fff9 60%,#c4161c22 100%);z-index:16;pointer-events:none;opacity:0;animation:trạmSeal 1.3s cubic-bezier(.7,.1,.3,1.2) .42s forwards;will-change:transform,opacity}
 @keyframes trạmSeal{0%{transform:scale(5) rotate(-15deg);opacity:0}35%{transform:scale(.85) rotate(5deg);opacity:1}50%{transform:scale(1.1) rotate(-3deg)}65%{transform:scale(1) rotate(0);opacity:1}85%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:0}}
 .trạm-blood{position:absolute;width:3cqw;aspect-ratio:1;background:radial-gradient(circle,#ff3030 0%,#8b0000 70%);border-radius:50%;z-index:14;pointer-events:none;animation:trạmBlood 1.7s cubic-bezier(.2,.9,.3,1) forwards;will-change:transform,opacity}
 @keyframes trạmBlood{0%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.1);opacity:0}}
 .trạm-king-tilt{animation:kingTilt 1.1s cubic-bezier(.6,.05,.4,1) .7s forwards!important;will-change:transform,opacity}
-@keyframes kingTilt{0%{rotate:0;scale:1;opacity:1}30%{rotate:-8deg;scale:1.05;opacity:1}60%{rotate:-20deg;scale:.9;opacity:.7}100%{rotate:-35deg;scale:.6;opacity:.25}}
+@keyframes kingTilt{0%{rotate:var(--flip-rot,0deg);scale:1;opacity:1}30%{rotate:calc(var(--flip-rot,0deg) - 8deg);scale:1.05;opacity:1}60%{rotate:calc(var(--flip-rot,0deg) - 20deg);scale:.9;opacity:.7}100%{rotate:calc(var(--flip-rot,0deg) - 35deg);scale:.6;opacity:.25}}
 #lobby, #lobby *, #lobby *::before, #lobby *::after{box-sizing:border-box}
 #lobby{position:fixed;inset:0;z-index:100;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#0a0505;color:#e6c36e;font-family:'Noto Serif','Noto Serif CJK TC',Georgia,serif;--gold:#d4af37;--gold-l:#e6c36e;--gold-d:#8a6a2f;--red:#8a1818;--red-d:#4a0a0a;--dark:#0a0505;--cream:#f6e9c8;--kai:'Ma Shan Zheng','STKaiti','KaiTi','Noto Serif CJK TC',serif;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
 #lobby[hidden]{display:none}
@@ -420,7 +518,7 @@ body.friendly-match #friendly-banner{display:block}
 .sm-frame-r2{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #E8E8E8,0 0 7px rgba(255,255,255,0.55) !important}
 .sm-frame-r3{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #4A90E2,0 0 9px rgba(74,144,226,0.6) !important}
 .sm-frame-r4{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #E74C3C,0 0 10px rgba(231,76,60,0.7) !important}
-.sm-frame-r5{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #FFD700,0 0 12px rgba(255,215,0,0.75) !important}
+.sm-frame-r5{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #FFD700,0 0 12px(255,215,0,0.75) !important}
 .sm-frame-r6{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #FFFFFF,0 0 12px rgba(155,89,182,0.85) !important}
 @media (max-width:360px){.lb-hero-avatar{width:100px;height:100px;font-size:46px}.lb-hero-name{font-size:18px}.lb-btn-main{font-size:17px;padding:14px 16px}.lb-icon-btn-card{padding:10px 4px}.lb-icon-btn-card .ib-ic{font-size:22px}}
    </style></head><body>
@@ -433,8 +531,8 @@ body.friendly-match #friendly-banner{display:block}
     <div class="lb-particles" id="lb-particles"></div>
     <header class="lb-header-mini">
       <div class="lb-brand-mini">CỜ TƯỚNG</div>
-      <button class="lb-icon-btn" id="auth-btn" aria-label="Đăng nhập">
-        <svg id="auth-icon" viewBox="0 0 24 24"><path d="M10 4H5v16h5M14 8l5 4-5 4M19 12H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <button class="lb-icon-btn" id="settings-btn" aria-label="Cài đặt">
+        <svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z" fill="currentColor"/></svg>
         <span class="net-dot" id="net-dot" title="Trạng thái kết nối"></span>
       </button>
     </header>
@@ -482,6 +580,27 @@ body.friendly-match #friendly-banner{display:block}
     <div class="lobby-inner" style="max-width:460px">
       <header class="lb-screen-header"><button class="lb-back" data-back="home" aria-label="Quay lại">←</button><h2>BẢNG XẾP HẠNG</h2></header>
       <div class="lb-board-list" id="leaderboard-list"><div style="text-align:center;padding:20px;color:#888">Đang tải...</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="settings-modal" class="modal-overlay">
+  <div class="m-panel">
+    <button class="m-close" onclick="this.closest('.modal-overlay').classList.remove('open')">✕</button>
+    <h2>CÀI ĐẶT</h2>
+    <p>Tùy chỉnh âm thanh &amp; tài khoản</p>
+    <div style="display:flex;flex-direction:column;gap:12px;margin:18px 0">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:rgba(255,255,255,0.05);border:1px solid #444;border-radius:8px">
+        <span style="font:700 14px system-ui;color:#fff">Âm lượng hiệu ứng</span>
+        <button id="btn-toggle-sound-modal" style="padding:7px 16px;border-radius:6px;border:1px solid #e6c36e;background:#8a1818;color:#fff;font:700 13px system-ui;cursor:pointer">🔊 Đang Bật</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:rgba(255,255,255,0.05);border:1px solid #444;border-radius:8px">
+        <div style="text-align:left">
+          <div style="font:700 14px system-ui;color:#fff">Tài khoản</div>
+          <small id="settings-auth-status" style="color:#aaa;font-size:11px">Chưa đăng nhập</small>
+        </div>
+        <button id="btn-auth-from-settings" style="padding:7px 16px;border-radius:6px;border:1px solid #e6c36e;background:#e6c36e;color:#000;font:700 13px system-ui;cursor:pointer">Đăng Nhập</button>
+      </div>
     </div>
   </div>
 </div>
@@ -548,6 +667,37 @@ body.friendly-match #friendly-banner{display:block}
   </div>
 </div>
 
+<div id="draw-req-modal" class="modal-overlay">
+  <div class="m-panel" style="border-color:#e6c36e">
+    <h2>XIN HÒA</h2>
+    <p id="draw-req-content" style="margin:18px 0;color:#fff;font-size:15px;line-height:1.5">Đối thủ muốn xin hòa ván này!</p>
+    <div style="display:flex;gap:10px">
+      <button class="auth-btn" id="btn-accept-draw" style="background:#e6c36e;color:#000">Đồng Ý Hòa</button>
+      <button class="auth-btn" id="btn-decline-draw" style="background:transparent;border:1px solid #444;color:#aaa">Từ Chối</button>
+    </div>
+  </div>
+</div>
+
+<div id="chat-modal" class="modal-overlay">
+  <div class="m-panel">
+    <button class="m-close" onclick="this.closest('.modal-overlay').classList.remove('open')">✕</button>
+    <h2>TRÒ CHUYỆN</h2>
+    <div class="chat-history-box" id="chat-history-box"><div style="color:#777;text-align:center">Chưa có tin nhắn</div></div>
+    <div class="quick-chat-grid">
+      <button class="quick-chat-item" data-msg="Cao cờ! Tại hạ bái phục! 🙏">Cao cờ! Tại hạ bái phục! 🙏</button>
+      <button class="quick-chat-item" data-msg="Nước cờ hiểm đấy! 🔥">Nước cờ hiểm đấy! 🔥</button>
+      <button class="quick-chat-item" data-msg="Đạo hữu suy nghĩ nhanh lên nhé! ⏳">Đạo hữu suy nghĩ nhanh lên nhé! ⏳</button>
+      <button class="quick-chat-item" data-msg="Đa tạ đã nhường! 😂">Đa tạ đã nhường! 😂</button>
+      <button class="quick-chat-item" data-msg="Ván sau tái đấu nhé! ⚔️">Ván sau tái đấu nhé! ⚔️</button>
+      <button class="quick-chat-item" data-msg="Xin chào kỳ hữu! 🤝">Xin chào kỳ hữu! 🤝</button>
+    </div>
+    <div class="friend-input-grp" style="margin-bottom:0">
+      <input type="text" id="chat-input" maxlength="60" placeholder="Nhập tin nhắn...">
+      <button id="btn-send-chat">GỬI</button>
+    </div>
+  </div>
+</div>
+
 <div id="incoming-modal" class="modal-overlay">
   <div class="m-panel" style="border-color:#ff4040">
     <h2>THÁCH ĐẤU</h2>
@@ -595,7 +745,29 @@ body.friendly-match #friendly-banner{display:block}
     <div class="tmw"><div class="tmrow"><span class="pmv" id="pmv0">60s</span><span class="tm" id="tm0">15:00</span></div><div class="tmb"><u id="tmb0"></u></div></div>
   </div>
 
-  <div id="bw"><div id="bd"><div id="end" hidden><h1></h1><div></div><button id="again" style="flex:none;padding:11px 28px">Ván mới</button><button id="home2" style="flex:none;padding:11px 28px">Về sảnh</button></div></div></div>
+  <div id="bw">
+    <div id="bd">
+      <div id="ready-overlay" hidden>
+        <div class="ready-box">
+          <h3>PHÒNG ĐẤU</h3>
+          <div class="ready-status-list">
+            <div id="ready-st-me">Bạn: ⏳ Chưa sẵn sàng</div>
+            <div id="ready-st-opp">Đối thủ: ⏳ Đang chờ...</div>
+          </div>
+          <button class="ready-btn" id="btn-ready-start">✋ SẴN SÀNG</button>
+        </div>
+      </div>
+      <div id="end" hidden>
+        <h1></h1>
+        <div></div>
+        <div class="end-btns">
+          <button id="again" class="primary">Ván mới</button>
+          <button id="btn-end-rank">⚔️ Vào Rank</button>
+          <button id="home2">Về sảnh</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="pl" id="t1">
     <div id="t1-info" style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;min-width:0;padding:2px 0;"><div class="av" id="av1" style="color:#c4161c;flex-shrink:0;">帥</div><div id="n1" style="display:flex;flex-direction:column;line-height:1.2;overflow:hidden;"></div></div>
@@ -606,11 +778,15 @@ body.friendly-match #friendly-banner{display:block}
 <div id="friendly-banner">⚔️ GIAO HỮU — KHÔNG TÍNH RANK</div>
 
 <div id="bar">
-  <button id="btn-sound" style="flex:none;width:44px;padding:9px 0;">🔊</button>
+  <button id="btn-sound" style="flex:none;width:38px;padding:9px 0;">🔊</button>
   <button id="new">Ván mới</button>
   <button id="undo">Đi lại</button>
+  <button id="btn-draw" style="display:none">🤝 Hòa</button>
+  <button id="btn-surrender" style="display:none">🏳️ Đầu hàng</button>
+  <button id="btn-chat" style="display:none">💬 Chat<span class="chat-badge" id="chat-badge"></span></button>
   <button id="home">Sảnh</button>
-</div><script>
+</div>
+<script>
 var XiangqiEngine = (function () {
   'use strict';
   const RED=1,BLACK=-1;
@@ -1230,7 +1406,8 @@ var XiangqiEngine = (function () {
     RED,BLACK,MATE,MATE_TH
   };
 })();
-</script><script>
+</script>
+<script>
 const $=s=>document.querySelector(s),sleep=t=>new Promise(r=>setTimeout(r,t)),bd=$('#bd');
 const INIT=['rheakaehr','.........','.c.....c.','p.p.p.p.p','.........','.........','P.P.P.P.P','.C.....C.','.........','RHEAKAEHR'];
 const NAME={k:'將帥',a:'士仕',e:'象相',h:'馬馬',r:'車車',c:'砲炮',p:'卒兵'};
@@ -1251,6 +1428,10 @@ let matchPollTimer=null;
 let isSearching=false;
 let pollInFlight=false;
 let pendingFriendReq = null; // Lưu lời mời kết bạn đang chờ xử lý
+let roomPlayer1 = null, roomPlayer2 = null;
+let bothPlayersReady = false;
+let lastDrawOfferTime = 0;
+let lastProcessedChatTime = 0;
 
 const LV=['Dễ','Thường','Khó','Siêu Khó'];
 const RANKS=[
@@ -1346,14 +1527,14 @@ function ensureDb(){
 }
 initFirebase();
 
-let S={w:0,l:0,pts:0,lv:1,name:'Kỳ thủ',avatar:'帥',id:'',friends:{},winStreak:0,lossStreak:0,bestWinStreak:0};
+let S={w:0,l:0,pts:0,lv:1,name:'Kỳ thủ',avatar:'帥',id:'',friends:{},winStreak:0,lossStreak:0,bestWinStreak:0,sfxOn:true};
 try{Object.assign(S,JSON.parse(localStorage.getItem('cotuong')||'{}'))}catch(e){}
 if(!S.id){S.id=Math.floor(100000+Math.random()*900000).toString();}
 const save=()=>{try{localStorage.setItem('cotuong',JSON.stringify(S))}catch(e){}};
 const stat=(isWin,points)=>{if(isWin)S.w++;else S.l++;S.pts+=points;if(S.pts<0)S.pts=0;save();updateDBProfile();};
 
 /* ===== ÂM THANH ===== */
-let AC,sfxOn=true,master;
+let AC,sfxOn=(S.sfxOn!==undefined)?S.sfxOn:true,master;
 const ac=()=>{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(!master){master=AC.createGain();master.gain.value=0.8;master.connect(AC.destination);}if(AC.state=='suspended')AC.resume();return AC;};
 let NOISE_BUF=null;
 function noiseNode(a,t,d,v,f,q,dest){
@@ -1396,6 +1577,15 @@ function sfx(k){
     if(k=='check'){const a=ac();const{boost,metal}=getChain();noiseNode(a,0,0.15,0.3,1200,2,metal);noiseNode(a,0.05,0.4,0.2,800,1.5,metal);noiseNode(a,0,0.3,0.8,200,1,boost);}
     if(k=='checkmate'){const a=ac();const{boost,metal}=getChain();noiseNode(a,0,0.4,1.5,150,0.5,boost);noiseNode(a,0.1,0.5,1.0,100,0.5,boost);noiseNode(a,0,0.3,0.8,1000,1,metal);noiseNode(a,0.2,0.4,0.6,2000,1,metal);}
   }catch(e){}
+}
+function syncSoundUI(){
+  const btnBar=$('#btn-sound');
+  if(btnBar)btnBar.textContent=sfxOn?'🔊':'🔇';
+  const btnModal=$('#btn-toggle-sound-modal');
+  if(btnModal){
+    btnModal.textContent=sfxOn?'🔊 Đang Bật':'🔇 Đang Tắt';
+    btnModal.style.background=sfxOn?'#8a1818':'#333';
+  }
 }
 
 /* ===== LUẬT CỜ (app-side) ===== */
@@ -1642,6 +1832,7 @@ function tick(){
   if(over||isSpectating)return stopClock();
   const now=performance.now();let dt=now-lastTick;lastTick=now;
   if(!$('#lobby').hidden)return;
+  if(isOnline && !bothPlayersReady) return;
   if(!isOnline&&dt>1000)dt=200;
   // F3: mất mạng → đóng băng đồng hồ, sẽ đồng bộ lại khi reconnect
   if(isOnline && !isFirebaseConnected) return;
@@ -1650,7 +1841,6 @@ function tick(){
     if(turn===myColor){
       if(clock[turn]<=0||pmv[turn]<=0){clock[turn]=Math.max(0,clock[turn]);pmv[turn]=Math.max(0,pmv[turn]);updateTimerDisplay();if(roomRef)roomRef.child('timeout').set({loserColor:myColor,by:myPlayerId});return finish('timeout',1-myColor);}
     }else{
-      // Đã sửa: Không dùng -5000 nữa, chờ đúng 0ms
       if(clock[turn]<=0||pmv[turn]<=0){clock[turn]=0;pmv[turn]=0;updateTimerDisplay();if(roomRef)roomRef.child('timeout').set({loserColor:1-myColor,by:myPlayerId});return finish('timeout',myColor);}
     }
   }else{
@@ -1704,7 +1894,8 @@ function showOppProfile(av,name,pts){
 }
 
 function ui(){
-  $('#t0').classList.toggle('on',turn==0&&!over);$('#t1').classList.toggle('on',turn==1&&!over);
+  $('#t0').classList.toggle('on',turn==0&&!over&&(!isOnline||bothPlayersReady));
+  $('#t1').classList.toggle('on',turn==1&&!over&&(!isOnline||bothPlayersReady));
   document.body.classList.toggle('flipped',isOnline&&myColor===0);
   document.body.classList.toggle('friendly-match',isOnline&&!isRanked&&!over);
   let p1_name,p1_av,p1_pts,p1_isMe,p0_name,p0_av,p0_pts,p0_isMe;
@@ -1725,9 +1916,12 @@ function ui(){
   renderBannerInfo(1,p1_name,p1_av,p1_pts,p1_isMe,'(Đỏ)');
   renderBannerInfo(0,p0_name,p0_av,p0_pts,p0_isMe,'(Đen)');
   bd.querySelectorAll('.chk').forEach(e=>e.classList.remove('chk'));
-  if(chk(B,turn)){const K=turn?'K':'k';B.forEach((w,r)=>w.forEach((p,c)=>p==K&&E[r][c].classList.add('chk')))}
+  if(chk(B,turn)){const K=turn?'K':'k';B.forEach((w,r)=>w.forEach((p,c)=>p==K&&E[r][c]&&E[r][c].classList.add('chk')))}
   $('#undo').style.display=(isOnline||isSpectating)?'none':'block';
   $('#new').style.display=(isOnline||isSpectating)?'none':'block';
+  $('#btn-draw').style.display=(isOnline&&!isSpectating&&!over)?'block':'none';
+  $('#btn-surrender').style.display=((isOnline||vsAI)&&!isSpectating&&!over)?'block':'none';
+  $('#btn-chat').style.display=(isOnline&&!isSpectating)?'block':'none';
 }
 
 /* ===== GAME FLOW ===== */
@@ -1746,6 +1940,7 @@ function newGame(){
   B=init();hist=[];sel=null;over=false;busy=false;turn=1;
   clock=[TOTAL,TOTAL];pmv=[PERMV,PERMV];
   $('#end').hidden=true;
+  $('#ready-overlay').hidden=true;
   rebuild();mark();ui();updateTimerDisplay();startClock();
 }
 function undo(){
@@ -1760,7 +1955,7 @@ function undo(){
   rebuild();mark(hist[hist.length-1]);ui();updateTimerDisplay();startClock();
   if(vsAI&&turn===0&&!over){triggerAI();}
 }
-function desel(){if(sel)E[sel[0]][sel[1]].classList.remove('sel');sel=null;clr()}
+function desel(){if(sel&&E[sel[0]]&&E[sel[0]][sel[1]])E[sel[0]][sel[1]].classList.remove('sel');sel=null;clr()}
 function select(r,c){desel();sel=[r,c];E[r][c].classList.add('sel');sfx('sel');moves=legal(B,turn).filter(m=>m[0]==r&&m[1]==c);for(const m of moves)put('hn'+(B[m[2]][m[3]]?' x':''),m[2],m[3])}
 
 async function executePlay(m,isRemote=false,remoteClocks=null){
@@ -1814,9 +2009,9 @@ async function after(){
   if(over){stopClock();busy=false;await sleep(ck?3920:700);return finish(ck?'chk':'nomove',1-turn);}
   busy=false;
   if(!isOnline&&vsAI&&turn===0){triggerAI();}
-  }
+}
 bd.addEventListener('pointerdown',ev=>{
-  if(isSpectating||busy||over||(isOnline&&turn!==myColor)||(!isOnline&&vsAI&&turn!==1))return;
+  if(isSpectating||busy||over||(isOnline&&(!bothPlayersReady||turn!==myColor))||(!isOnline&&vsAI&&turn!==1))return;
   const R=bd.getBoundingClientRect();
   let c=Math.round((ev.clientX-R.left)/R.width*9-.5);
   let r=Math.round((ev.clientY-R.top)/R.height*10-.5);
@@ -1826,17 +2021,166 @@ bd.addEventListener('pointerdown',ev=>{
   if(p&&sd(p)==turn){sel&&sel[0]==r&&sel[1]==c?desel():select(r,c)}
   else if(sel){const m=moves.find(m=>m[2]==r&&m[3]==c);m?executePlay(m):desel()}
 });
-
 function startNewOrExit(){
   if(busy&&!aiThinking&&!over)return;
   if(isSpectating){exitSpectator();return;}
-  if(isOnline){lobby(true);return;}
+  if(isOnline&&roomRef){
+    sfx('sel');
+    roomRef.child('rematch/'+myPlayerId).set(true);
+    const btn=$('#again');
+    if(btn){btn.textContent='Đang chờ đối thủ...';btn.disabled=true;}
+    return;
+  }
   newGame();
 }
 $('#new').onclick=$('#again').onclick=startNewOrExit;
 $('#undo').onclick=undo;
-$('#btn-sound').onclick=()=>{sfxOn=!sfxOn;$('#btn-sound').textContent=sfxOn?'🔊':'🔇';sfx('sel');};
+$('#btn-sound').onclick=()=>{sfxOn=!sfxOn;S.sfxOn=sfxOn;save();syncSoundUI();sfx('sel');};
+$('#btn-toggle-sound-modal').onclick=()=>{sfxOn=!sfxOn;S.sfxOn=sfxOn;save();syncSoundUI();sfx('sel');};
 $('#spec-exit').onclick=()=>{sfx('sel');exitSpectator();};
+
+/* ===== NÚT CÀI ĐẶT SẢNH ===== */
+function updateSettingsAuthUI(){
+  const st=$('#settings-auth-status'),btn=$('#btn-auth-from-settings');
+  if(!st||!btn)return;
+  if(auth&&auth.currentUser){
+    const u=auth.currentUser;
+    st.textContent=u.isAnonymous?'Đang chơi Ẩn danh (ID: '+S.id+')':(u.email||u.displayName||'Đã đăng nhập');
+    btn.textContent='Đăng Xuất';
+    btn.style.background='#4a0a0a';
+    btn.style.color='#fff';
+  }else{
+    st.textContent='Chưa đăng nhập';
+    btn.textContent='Đăng Nhập';
+    btn.style.background='#e6c36e';
+    btn.style.color='#000';
+  }
+}
+$('#settings-btn').onclick=()=>{
+  sfx('sel');
+  syncSoundUI();
+  updateSettingsAuthUI();
+  $('#settings-modal').classList.add('open');
+};
+$('#btn-auth-from-settings').onclick=()=>{
+  sfx('sel');
+  $('#settings-modal').classList.remove('open');
+  if(auth&&auth.currentUser){
+    if(confirm('Đăng xuất khỏi tài khoản?'))auth.signOut();
+  }else{
+    $('#auth-modal').classList.add('open');
+  }
+};
+
+/* ===== ĐẦU HÀNG, CẦU HÒA & VÀO RANK ===== */
+$('#btn-surrender').onclick=()=>{
+  if(over||isSpectating)return;
+  sfx('sel');
+  if(confirm('Bạn chắc chắn muốn đầu hàng ván này?')){
+    if(isOnline&&roomRef){
+      roomRef.child('surrender').set(myPlayerId);
+      finish('surrender',1-myColor);
+    }else if(vsAI){
+      finish('surrender',0);
+    }
+  }
+};
+
+$('#btn-draw').onclick=()=>{
+  if(!isOnline||!roomRef||over||isSpectating)return;
+  const now=Date.now();
+  if(now-lastDrawOfferTime<20000){
+    alert('Vui lòng chờ '+Math.ceil((20000-(now-lastDrawOfferTime))/1000)+' giây trước khi gửi lại lời cầu hòa.');
+    return;
+  }
+  sfx('sel');
+  lastDrawOfferTime=now;
+  roomRef.child('drawOffer').set({from:myPlayerId,name:S.name,status:'pending',t:now});
+  alert('Đã gửi lời đề nghị hòa cờ tới đối thủ!');
+};
+
+$('#btn-accept-draw').onclick=()=>{
+  sfx('sel');
+  $('#draw-req-modal').classList.remove('open');
+  if(roomRef)roomRef.child('drawOffer').update({status:'accepted'});
+  finish('draw',-1);
+};
+$('#btn-decline-draw').onclick=()=>{
+  sfx('sel');
+  $('#draw-req-modal').classList.remove('open');
+  if(roomRef)roomRef.child('drawOffer').update({status:'declined'});
+};
+
+$('#btn-end-rank').onclick=()=>{
+  sfx('sel');
+  if(!ensureDb())return;
+  if(!auth||!auth.currentUser){lobby(true);$('#auth-modal').classList.add('open');return;}
+  if(isOnline&&roomRef){
+    try{roomRef.child('leave').set(myPlayerId);}catch(e){}
+  }
+  lobby(true);
+  isRanked=true;
+  $('#online-title').textContent='LEO RANK ONLINE';
+  switchScreen('online');
+  $('#btn-find-match').click();
+};
+
+/* ===== SẴN SÀNG TRONG PHÒNG ===== */
+$('#btn-ready-start').onclick=()=>{
+  if(!isOnline||!roomRef)return;
+  sfx('sel');
+  roomRef.child('ready/'+myPlayerId).set(true);
+  $('#btn-ready-start').disabled=true;
+  $('#btn-ready-start').textContent='ĐANG CHỜ ĐỐI THỦ...';
+};
+
+/* ===== CHAT TRONG TRẬN ===== */
+function showChatBubble(isMe,text){
+  const targetBanner = (isMe ? (myColor===1 ? $('#t1') : $('#t0')) : (myColor===1 ? $('#t0') : $('#t1')));
+  if(!targetBanner)return;
+  const old=targetBanner.querySelector('.chat-bubble');
+  if(old)old.remove();
+  const b=document.createElement('div');
+  b.className='chat-bubble';
+  b.textContent=text;
+  targetBanner.appendChild(b);
+  setTimeout(()=>{b.remove();},4000);
+}
+function appendChatHistory(senderName,text,isMe){
+  const box=$('#chat-history-box');
+  if(!box)return;
+  if(box.children.length===1&&box.children[0].textContent==='Chưa có tin nhắn')box.innerHTML='';
+  const line=document.createElement('div');
+  line.innerHTML=`<b style="color:${isMe?'#ffd24a':'#6fdb6f'}">${senderName}:</b> <span style="color:#fff">${text}</span>`;
+  box.appendChild(line);
+  box.scrollTop=box.scrollHeight;
+}
+function sendChatMessage(msg){
+  if(!isOnline||!roomRef||!msg)return;
+  const clean=msg.trim().substring(0,60);
+  if(!clean)return;
+  sfx('sel');
+  roomRef.child('chat').set({by:myPlayerId,name:S.name,msg:clean,t:Date.now()});
+  $('#chat-modal').classList.remove('open');
+}
+$('#btn-chat').onclick=()=>{
+  sfx('sel');
+  $('#chat-badge').style.display='none';
+  $('#chat-modal').classList.add('open');
+};
+document.querySelectorAll('.quick-chat-item').forEach(btn=>{
+  btn.onclick=()=>sendChatMessage(btn.dataset.msg);
+});
+$('#btn-send-chat').onclick=()=>{
+  const inp=$('#chat-input');
+  if(inp&&inp.value.trim()){
+    sendChatMessage(inp.value);
+    inp.value='';
+  }
+};
+$('#chat-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter')$('#btn-send-chat').click();
+});
 
 function renderAvatarEl(el,avatarStr){
   if(!el)return;
@@ -1889,19 +2233,24 @@ function lob(){
   const resumeBtn=document.getElementById('btn-resume');
   if(resumeBtn){resumeBtn.hidden=!(hist.length&&!over&&!isOnline&&!isSpectating);}
 }
-function lobby(on){
+function lobby(on,initialLoad=false){
   $('#lobby').hidden=!on;
   if(on){
-    localStorage.removeItem('currentRoomId');
-    currentRoomId = null; // F5: xoá room ID khi về sảnh
+    if(!initialLoad){
+      localStorage.removeItem('currentRoomId');
+      if(db&&auth&&auth.currentUser&&myPlayerId){
+        try{db.ref('users/'+myPlayerId+'/inMatch').remove();}catch(e){}
+      }
+      if(isOnline&&roomRef&&!over){try{roomRef.child('surrender').set(myPlayerId);}catch(e){}}
+      currentRoomId = null;
+    }
     currentAiRequestId++;aiThinking=false;busy=false;
-    if(isOnline&&roomRef&&!over){try{roomRef.child('surrender').set(myPlayerId);}catch(e){}}
     if(isSpectating){
       isSpectating=false;
       if(spectatorRoomRef){try{spectatorRoomRef.off();}catch(e){}spectatorRoomRef=null;}
       $('#spectator-bar').classList.remove('on');
     }
-    cleanupRoomListeners();isOnline=false;roomRef=null;
+    cleanupRoomListeners(!initialLoad);isOnline=false;roomRef=null;
     cancelMatch(true);document.body.classList.remove('flipped');
     lob();switchScreen('home');
   }else{lastTick=performance.now();}
@@ -1942,11 +2291,6 @@ $('#btn-leaderboard').onclick=()=>{
   if(!ensureDb())return;
   sfx('sel');switchScreen('leaderboard');renderLeaderboard();
 };
-$('#auth-btn').onclick=()=>{
-  sfx('sel');
-  if(auth&&auth.currentUser){if(confirm('Đăng xuất khỏi tài khoản?'))auth.signOut();}
-  else{$('#auth-modal').classList.add('open');}
-};
 $('#btn-find-match').onclick=()=>{
   if(!ensureDb())return;
   if(!auth||!auth.currentUser){$('#auth-modal').classList.add('open');return;}
@@ -1964,7 +2308,10 @@ $('#home').onclick=$('#home2').onclick=()=>{
       if(roomRef)roomRef.child('surrender').set(myPlayerId);
       finish('surrender',1-myColor);lobby(true);
     }
-  }else{lobby(true);}
+  }else{
+    if(isOnline&&roomRef){try{roomRef.child('leave').set(myPlayerId);}catch(e){}}
+    lobby(true);
+  }
 };
 
 /* ===== PROFILE ===== */
@@ -2016,7 +2363,7 @@ $('#save-profile').onclick=()=>{
   sfx('sel');S.name=$('#name-input').value.trim()||'Kỳ thủ';S.avatar=tempAvatar;save();updateDBProfile();lob();ui();$('#profile-modal').classList.remove('open');
 };
 
-/* ===== BẠN BÈ (GỬI/NHẬN QUA MODAL) ===== */
+/* ===== BẠN BÈ (ĐÃ SỬA LỖI ĐƠ NÚT ĐỒNG Ý / TỪ CHỐI) ===== */
 async function renderFriends(){
   const flist=$('#friend-list');
   if(!S.friends||Object.keys(S.friends).length===0){
@@ -2079,7 +2426,9 @@ $('#btn-add-friend').onclick=async()=>{
 
 function listenFriends(){
   if(!db||!myPlayerId)return;
-  db.ref('users/'+myPlayerId+'/friends').on('value',snap=>{
+  const fRef=db.ref('users/'+myPlayerId+'/friends');
+  fRef.off();
+  fRef.on('value',snap=>{
     const fData=snap.val();
     if(fData){
       S.friends=fData;
@@ -2089,55 +2438,47 @@ function listenFriends(){
   });
 }
 
+// Gắn sự kiện trực tiếp cho 2 nút Đồng Ý / Từ Chối kết bạn
+$('#btn-accept-friend').onclick=async()=>{
+  if(!pendingFriendReq||!db)return;
+  sfx('sel');
+  const req=pendingFriendReq;
+  $('#btn-accept-friend').textContent='Đang xử lý...';
+  try{
+    const fObj={id:req.id||'',name:req.name||'Kỳ thủ',avatar:req.avatar||'帥',pts:req.pts||0};
+    await db.ref('users/'+myPlayerId+'/friends/'+req.uid).set(fObj);
+    await db.ref('users/'+req.uid+'/friends/'+myPlayerId).set({id:S.id,name:S.name,avatar:S.avatar,pts:S.pts});
+    await db.ref('friend_requests/'+myPlayerId+'/'+req.uid).remove();
+    S.friends=S.friends||{};
+    S.friends[req.uid]=fObj;
+    save();
+    $('#friend-req-modal').classList.remove('open');
+  }catch(e){
+    alert("Lỗi kết bạn: "+e.message);
+  }
+  $('#btn-accept-friend').textContent='Đồng Ý';
+  pendingFriendReq=null;
+};
+
+$('#btn-decline-friend').onclick=async()=>{
+  if(!pendingFriendReq||!db){$('#friend-req-modal').classList.remove('open');return;}
+  sfx('sel');
+  const req=pendingFriendReq;
+  try{await db.ref('friend_requests/'+myPlayerId+'/'+req.uid).remove();}catch(e){}
+  $('#friend-req-modal').classList.remove('open');
+  pendingFriendReq=null;
+};
+
 function listenFriendRequests(){
   if(!db||!myPlayerId)return;
-  
-  if(!document.getElementById('friend-req-modal')){
-    document.body.insertAdjacentHTML('beforeend', `
-    <div id="friend-req-modal" class="modal-overlay">
-      <div class="m-panel" style="border-color:#e6c36e">
-        <h2>LỜI MỜI KẾT BẠN</h2>
-        <div id="friend-req-content" style="margin:20px 0;color:#fff;font-size:15px;line-height:1.5"></div>
-        <div style="display:flex;gap:10px">
-          <button class="auth-btn" id="btn-accept-friend" style="background:#e6c36e;color:#000">Đồng Ý</button>
-          <button class="auth-btn" id="btn-decline-friend" style="background:transparent;border:1px solid #444;color:#aaa">Từ Chối</button>
-        </div>
-      </div>
-    </div>`);
-    
-    $('#btn-accept-friend').onclick=async()=>{
-      if(!pendingFriendReq)return;
-      const req=pendingFriendReq;
-      $('#btn-accept-friend').textContent='Đang xử lý...';
-      try{
-        await db.ref('users/'+myPlayerId+'/friends/'+req.uid).set({id:req.id,name:req.name,avatar:req.avatar,pts:req.pts});
-        await db.ref('users/'+req.uid+'/friends/'+myPlayerId).set({id:S.id,name:S.name,avatar:S.avatar,pts:S.pts});
-        await db.ref('friend_requests/'+myPlayerId+'/'+req.uid).remove();
-        $('#friend-req-modal').classList.remove('open');
-      }catch(e){
-        alert("Lỗi: "+e.message);
-      }
-      $('#btn-accept-friend').textContent='Đồng Ý';
-      pendingFriendReq=null;
-    };
-
-    $('#btn-decline-friend').onclick=async()=>{
-      if(!pendingFriendReq)return;
-      const req=pendingFriendReq;
-      await db.ref('friend_requests/'+myPlayerId+'/'+req.uid).remove();
-      $('#friend-req-modal').classList.remove('open');
-      pendingFriendReq=null;
-    };
-  }
-
-  db.ref('friend_requests/'+myPlayerId).on('child_added',snap=>{
+  const reqRef=db.ref('friend_requests/'+myPlayerId);
+  reqRef.off();
+  reqRef.on('child_added',snap=>{
     const fromUid=snap.key;
     const req=snap.val();
     if(!req)return;
-    if(pendingFriendReq)return;
-    
     pendingFriendReq={uid:fromUid, ...req};
-    $('#friend-req-content').innerHTML=`<b>${req.name}</b> (ID: ${req.id})<br>muốn kết bạn với bạn!`;
+    $('#friend-req-content').innerHTML=`<b>${req.name||'Kỳ thủ'}</b> (ID: ${req.id||'------'})<br>muốn kết bạn với bạn!`;
     $('#friend-req-modal').classList.add('open');
     sfx('check');
   });
@@ -2184,7 +2525,7 @@ $('#btn-accept-chal').onclick=async()=>{
   sfx('sel');if(!incomingChallengeData)return;
   const roomId='friend_'+Date.now();
   myColor=1;
-  await db.ref('rooms/'+roomId).set({player1:myPlayerId,player2:incomingChallengeData.from,turn:1,createdAt:Date.now()});
+  await db.ref('rooms/'+roomId).set({player1:myPlayerId,player2:incomingChallengeData.from,turn:1,ranked:false,createdAt:Date.now()});
   await db.ref('challenges/'+myPlayerId).update({status:'accepted',roomId:roomId});
   $('#incoming-modal').classList.remove('open');
   isRanked=false;
@@ -2297,7 +2638,7 @@ async function findMatch(){
       
       if(myPlayerId<oppUid){
         console.log('[Match] Owner. room='+roomId+' opp='+oppUid.substring(0,8));
-        await db.ref('rooms/'+roomId).set({player1:myPlayerId,player2:oppUid,turn:1,createdAt:Date.now()});
+        await db.ref('rooms/'+roomId).set({player1:myPlayerId,player2:oppUid,turn:1,ranked:true,createdAt:Date.now()});
         await db.ref('matchmaking/'+oppUid).update({matched:true,roomId:roomId,opponent:myPlayerId});
         try{
           db.ref('matchmaking/'+myPlayerId).onDisconnect().cancel();
@@ -2334,6 +2675,7 @@ async function joinAsSpectator(roomId,hostName){
   B=init();hist=[];turn=1;sel=null;over=false;busy=false;
   clock=[TOTAL,TOTAL];pmv=[PERMV,PERMV];
   $('#end').hidden=true;
+  $('#ready-overlay').hidden=true;
   rebuild();mark();updateTimerDisplay();stopClock();
   $('#spectator-bar').classList.add('on');
   $('#spec-host-name').textContent=hostName||'trận đấu';
@@ -2376,20 +2718,25 @@ function exitSpectator(){
   lobby(true);
 }
 
-function cleanupRoomListeners(){
+function cleanupRoomListeners(clearInMatch=false){
   if(disconnectTimer){clearTimeout(disconnectTimer);disconnectTimer=null;}
   if(roomRef){
     try{
       roomRef.child('move').off();
       roomRef.child('surrender').off();
       roomRef.child('timeout').off();
+      roomRef.child('drawOffer').off();
+      roomRef.child('chat').off();
+      roomRef.child('ready').off();
+      roomRef.child('rematch').off();
+      roomRef.child('gameIndex').off();
+      roomRef.child('leave').off();
       roomRef.child('presence/'+myPlayerId).onDisconnect().cancel();
       roomRef.child('presence/'+myPlayerId).remove();
     }catch(e){}
   }
-  if(db&&auth&&auth.currentUser&&myPlayerId){
+  if(clearInMatch&&db&&auth&&auth.currentUser&&myPlayerId){
     try{
-      db.ref('users/'+myPlayerId+'/inMatch').onDisconnect().cancel();
       db.ref('users/'+myPlayerId+'/inMatch').remove();
     }catch(e){}
   }
@@ -2401,18 +2748,29 @@ function finish(reason,winner){
   busy=false;
   aiThinking=false;
   stopClock();
-  localStorage.removeItem('currentRoomId');
+  $('#draw-req-modal').classList.remove('open');
   const endEl=$('#end');
   const h1=endEl.querySelector('h1');
   const desc=endEl.querySelector('div');
+  const againBtn=$('#again');
+  if(againBtn){
+    againBtn.disabled=false;
+    againBtn.textContent=isOnline?'🔄 Sẵn sàng ván mới':'Ván mới';
+  }
+  const endRankBtn=$('#btn-end-rank');
+  if(endRankBtn)endRankBtn.style.display=isSpectating?'none':'inline-block';
+
   let isWin=false;
-  if(isSpectating){
+  if(reason==='draw'||winner===-1){
+    h1.textContent='HÒA CỜ';
+    desc.textContent=isOnline?'Hai bên đồng ý hòa (0 điểm)':'Ván đấu hòa';
+  }else if(isSpectating){
     h1.textContent=winner===1?'ĐỎ THẮNG':'ĐEN THẮNG';
     desc.textContent='Trận đấu đã kết thúc';
   }else if(isOnline){
     isWin=(winner===myColor);
     h1.textContent=isWin?'THẮNG':'THUA';
-    const rText=reason==='timeout'?'Hết thời gian':(reason==='surrender'?'Đối thủ đầu hàng':'Chiếu bí');
+    const rText=reason==='timeout'?'Hết thời gian':(reason==='surrender'?'Đầu hàng':'Chiếu bí');
     if(isRanked){
       const rInfo=getRankInfo(S.pts);
       const ptsChange=isWin?25:-rInfo.lossPoints;
@@ -2423,11 +2781,10 @@ function finish(reason,winner){
     }else{
       desc.textContent=`${rText} (Giao hữu)`;
     }
-    cleanupRoomListeners();
   }else if(vsAI){
     isWin=(winner===1);
     h1.textContent=isWin?'THẮNG':'THUA';
-    desc.textContent=reason==='timeout'?'Hết thời gian':'Chiếu bí';
+    desc.textContent=reason==='timeout'?'Hết thời gian':(reason==='surrender'?'Bạn đã đầu hàng':'Chiếu bí');
   }else{
     h1.textContent=winner===1?'ĐỎ THẮNG':'ĐEN THẮNG';
     desc.textContent=reason==='timeout'?'Hết thời gian':'Chiếu bí';
@@ -2437,24 +2794,35 @@ function finish(reason,winner){
 }
 
 async function joinFirebaseRoom(roomId){
-  cleanupRoomListeners();
+  cleanupRoomListeners(false);
   currentRoomId=roomId;roomRef=db.ref('rooms/'+roomId);
   
-  // F5: kiểm tra phòng còn tồn tại không
+  let roomData=null;
   try {
     const chk = await roomRef.once('value');
     if (!chk.exists()) {
       localStorage.removeItem('currentRoomId');
+      if(db&&auth&&auth.currentUser)db.ref('users/'+myPlayerId+'/inMatch').remove().catch(()=>{});
       currentRoomId = null; roomRef = null;
       alert('Trận đấu đã kết thúc hoặc không còn tồn tại.');
       lobby(true);
       return;
     }
+    roomData=chk.val();
   } catch(e) { console.warn('[Room] verify fail:', e); }
   
+  if(roomData){
+    roomPlayer1=roomData.player1;
+    roomPlayer2=roomData.player2;
+    myColor=(roomPlayer1===myPlayerId)?1:0;
+    if(typeof roomData.ranked==='boolean')isRanked=roomData.ranked;
+  }
+
   isOnline=true;vsAI=false;isSpectating=false;
-  
   localStorage.setItem('currentRoomId', roomId);
+  if(db&&auth&&auth.currentUser){
+    try{db.ref('users/'+myPlayerId+'/inMatch').set(roomId);}catch(e){}
+  }
 
   const snapHistory = await db.ref('rooms/'+roomId+'/moveHistory').once('value');
   const history = snapHistory.val() || {};
@@ -2464,7 +2832,6 @@ async function joinFirebaseRoom(roomId){
   entries.forEach(e=>{ mk(B, e.m); hist.push(e.m); });
   turn = (hist.length % 2) ? 0 : 1;
   
-  // F5: khôi phục clock + trừ thời gian đã trôi qua kể từ nước cuối
   if (entries.length > 0 && entries[entries.length-1].clock) {
     const last = entries[entries.length-1];
     clock = last.clock.slice();
@@ -2480,19 +2847,104 @@ async function joinFirebaseRoom(roomId){
   }
   
   $('#end').hidden=true;
+  $('#chat-history-box').innerHTML='<div style="color:#777;text-align:center">Chưa có tin nhắn</div>';
+
+  // Nếu ván cờ đã có nước đi (kết nối lại giữa trận), cho phép đánh tiếp luôn
+  if(entries.length>0){
+    bothPlayersReady=true;
+    $('#ready-overlay').hidden=true;
+  }else{
+    bothPlayersReady=false;
+    $('#ready-overlay').hidden=false;
+    $('#btn-ready-start').disabled=false;
+    $('#btn-ready-start').textContent='✋ SẴN SÀNG';
+  }
+
   rebuild(); mark(hist.length>0 ? hist[hist.length-1] : null);
   lobby(false); ui(); updateTimerDisplay(); startClock();
   
-  // F5: ván đã hết giờ trong lúc mất kết nối → xử lý luôn
-  if (clock[turn] <= 0 || pmv[turn] <= 0) {
+  if (bothPlayersReady && (clock[turn] <= 0 || pmv[turn] <= 0)) {
     finish('timeout', 1 - turn);
     return;
   }
 
   const myPresenceRef=roomRef.child('presence/'+myPlayerId);
   myPresenceRef.set(true);myPresenceRef.onDisconnect().remove();
-  
-  if(db&&auth&&auth.currentUser){try{db.ref('users/'+myPlayerId+'/inMatch').set(roomId);db.ref('users/'+myPlayerId+'/inMatch').onDisconnect().remove();}catch(e){}}
+
+  // Lắng nghe trạng thái Sẵn sàng đầu ván
+  roomRef.child('ready').on('value',snap=>{
+    const r=snap.val()||{};
+    const oppUid=(myPlayerId===roomPlayer1)?roomPlayer2:roomPlayer1;
+    const meOk=!!r[myPlayerId],oppOk=!!r[oppUid];
+    const stMe=$('#ready-st-me'),stOpp=$('#ready-st-opp');
+    if(stMe)stMe.innerHTML=`Bạn: <b style="color:${meOk?'#10b981':'#f59e0b'}">${meOk?'✅ Đã sẵn sàng':'⏳ Chưa sẵn sàng'}</b>`;
+    if(stOpp)stOpp.innerHTML=`${oppName}: <b style="color:${oppOk?'#10b981':'#f59e0b'}">${oppOk?'✅ Đã sẵn sàng':'⏳ Đang chờ...'}</b>`;
+    if(meOk&&oppOk&&!bothPlayersReady){
+      bothPlayersReady=true;
+      $('#ready-overlay').hidden=true;
+      lastTick=performance.now();
+      sfx('move');
+      ui();
+    }
+  });
+
+  // Lắng nghe Sẵn sàng Tái đấu (Rematch) sau khi kết thúc ván
+  let currentKnownGameIdx = (roomData && roomData.gameIndex) ? roomData.gameIndex : 0;
+  roomRef.child('rematch').on('value',async snap=>{
+    const rm=snap.val()||{};
+    const oppUid=(myPlayerId===roomPlayer1)?roomPlayer2:roomPlayer1;
+    const meRm=!!rm[myPlayerId],oppRm=!!rm[oppUid];
+    const btn=$('#again');
+    if(over&&isOnline&&btn){
+      const cnt=(meRm?1:0)+(oppRm?1:0);
+      btn.textContent=meRm?`Đang chờ đối thủ (${cnt}/2)...`:`🔄 Sẵn sàng ván mới (${cnt}/2)`;
+    }
+    if(meRm&&oppRm&&myPlayerId===roomPlayer1){
+      const newP1=roomPlayer2,newP2=roomPlayer1;
+      await roomRef.update({
+        player1:newP1,
+        player2:newP2,
+        turn:1,
+        move:null,
+        moveHistory:null,
+        surrender:null,
+        timeout:null,
+        drawOffer:null,
+        rematch:null,
+        ready:{[newP1]:true,[newP2]:true},
+        gameIndex:currentKnownGameIdx+1
+      });
+    }
+  });
+
+  roomRef.child('gameIndex').on('value',snap=>{
+    const idx=snap.val();
+    if(typeof idx==='number'&&idx>currentKnownGameIdx){
+      currentKnownGameIdx=idx;
+      roomRef.once('value',rsnap=>{
+        const rd=rsnap.val();
+        if(!rd)return;
+        roomPlayer1=rd.player1;
+        roomPlayer2=rd.player2;
+        myColor=(roomPlayer1===myPlayerId)?1:0;
+        bothPlayersReady=true;
+        B=init();hist=[];sel=null;over=false;busy=false;turn=1;
+        clock=[TOTAL,TOTAL];pmv=[PERMV,PERMV];
+        $('#end').hidden=true;
+        $('#ready-overlay').hidden=true;
+        rebuild();mark();ui();updateTimerDisplay();startClock();
+        sfx('check');
+      });
+    }
+  });
+
+  roomRef.child('leave').on('value',snap=>{
+    const who=snap.val();
+    if(who&&who!==myPlayerId&&over){
+      const btn=$('#again');
+      if(btn){btn.textContent='Đối thủ đã rời phòng';btn.disabled=true;}
+    }
+  });
 
   roomRef.child('move').on('value',snap=>{
     const moveData=snap.val();if(!moveData||over)return;
@@ -2507,6 +2959,40 @@ async function joinFirebaseRoom(roomId){
     if(!val||over)return;
     if(typeof val==='object'&&val.loserColor!==undefined){finish('timeout',1-val.loserColor);}
     else if(val!==myPlayerId){finish('timeout',myColor);}
+  });
+
+  // Lắng nghe Cầu hòa
+  roomRef.child('drawOffer').on('value',snap=>{
+    const d=snap.val();
+    if(!d||over)return;
+    if(d.status==='pending'&&d.from!==myPlayerId){
+      $('#draw-req-content').innerHTML=`Kỳ thủ <b>${d.name||'Đối thủ'}</b> muốn xin hòa ván này.<br>Bạn có đồng ý không?`;
+      $('#draw-req-modal').classList.add('open');
+      sfx('sel');
+    }else if(d.status==='accepted'){
+      $('#draw-req-modal').classList.remove('open');
+      finish('draw',-1);
+    }else if(d.status==='declined'&&d.from===myPlayerId){
+      roomRef.child('drawOffer').remove().catch(()=>{});
+      alert('Đối thủ đã từ chối lời đề nghị hòa cờ.');
+    }
+  });
+
+  // Lắng nghe Chat trong trận
+  lastProcessedChatTime=Date.now()-2000;
+  roomRef.child('chat').on('value',snap=>{
+    const c=snap.val();
+    if(!c||!c.msg||!c.t||c.t<=lastProcessedChatTime)return;
+    lastProcessedChatTime=c.t;
+    const isMe=(c.by===myPlayerId);
+    showChatBubble(isMe,c.msg);
+    appendChatHistory(isMe?'Bạn':(c.name||oppName),c.msg,isMe);
+    if(!isMe){
+      sfx('sel');
+      if(!$('#chat-modal').classList.contains('open')){
+        $('#chat-badge').style.display='block';
+      }
+    }
   });
 }
 
@@ -2530,11 +3016,10 @@ $('#btn-anon-login').onclick=async()=>{if(!ensureDb())return;try{await auth.sign
 
 if(initFirebase()&&auth){
   auth.onAuthStateChanged(async user=>{
-    const icon=$('#auth-icon'),btn=$('#auth-btn');
+    updateSettingsAuthUI();
     if(user){
-      icon.innerHTML='<path d="M16 17l5-5-5-5M21 12H9M12 19v2H5V3h7v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
-      btn.setAttribute('aria-label','Đăng xuất');
       myPlayerId=user.uid;
+      let fbInMatch=null;
       if(db){
         try{
           const usnap=await db.ref('users/'+myPlayerId).once('value');
@@ -2547,6 +3032,7 @@ if(initFirebase()&&auth){
             if(typeof ud.w==='number'&&ud.w>S.w)S.w=ud.w;
             if(typeof ud.l==='number'&&ud.l>S.l)S.l=ud.l;
             if(ud.friends)S.friends=Object.assign({},S.friends,ud.friends);
+            if(ud.inMatch)fbInMatch=ud.inMatch;
             save();
           }
         }catch(e){}
@@ -2556,12 +3042,17 @@ if(initFirebase()&&auth){
       listenFriends();
       listenFriendRequests();
       
-      // Khôi phục phòng cũ nếu có
-      const savedRoom = localStorage.getItem('currentRoomId');
-      if(savedRoom){
+      // Khôi phục phòng đang đánh dở khi vô tình thoát web / tải lại trang
+      const savedRoom = localStorage.getItem('currentRoomId') || fbInMatch;
+      if(savedRoom && !isOnline){
         db.ref('rooms/'+savedRoom).once('value', snap=>{
           if(snap.exists()){
             const room = snap.val();
+            if(room.surrender || room.timeout){
+              localStorage.removeItem('currentRoomId');
+              db.ref('users/'+myPlayerId+'/inMatch').remove().catch(()=>{});
+              return;
+            }
             myColor = (room.player1 === myPlayerId) ? 1 : 0;
             const oppUid = (myColor === 1) ? room.player2 : room.player1;
             loadOpponentInfo(oppUid, myColor===1 ? '將' : '帥').then(()=>{
@@ -2569,12 +3060,10 @@ if(initFirebase()&&auth){
             });
           }else{
             localStorage.removeItem('currentRoomId');
+            db.ref('users/'+myPlayerId+'/inMatch').remove().catch(()=>{});
           }
         });
       }
-    }else{
-      icon.innerHTML='<path d="M10 4H5v16h5M14 8l5 4-5 4M19 12H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
-      btn.setAttribute('aria-label','Đăng nhập');
     }
   });
 }
@@ -2583,9 +3072,10 @@ if(initFirebase()&&auth){
 try{
   document.addEventListener('pointerdown',function initAudio(){ac();document.removeEventListener('pointerdown',initAudio);},{once:true});
   cacheTimerEls();
+  syncSoundUI();
   drawBoard();
   newGame();
-  lobby(true);
+  lobby(true, true);
   (function initParticles(){
     const container=document.getElementById('lb-particles');
     if(!container)return;
@@ -2603,6 +3093,31 @@ try{
 </script>
 </body>
 </html>
+
+  <script>
+try {
+document.getElementById("btn").addEventListener("click", () => {
+  alert("Nice! JavaScript đang chạy trong Preview iframe ✅");
+});
+} catch (error) {
+  console.error(error);
+}
+  </script>
+</body>
+</html>
+
+  <script>
+try {
+document.getElementById("btn").addEventListener("click", () => {
+  alert("Nice! JavaScript đang chạy trong Preview iframe ✅");
+});
+} catch (error) {
+  console.error(error);
+}
+  </script>
+</body>
+</html>
+
 
   <script>
 try {
