@@ -413,7 +413,7 @@ body.flipped .trạm-seal{right:auto;top:auto;left:8%;bottom:8%}
 @keyframes silverShine{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
 .r-c3{background:radial-gradient(circle at 32% 28%,#7AB8F0 0%,#2C5FA0 42%,#0F2A4A 100%);color:#E0F0FF;border:2px solid #4A90E2;text-shadow:0 0 4px rgba(122,184,240,0.55),0 1px 2px rgba(0,0,0,0.9);box-shadow:inset 0 2px 4px rgba(255,255,255,0.4),inset 0 -2px 4px rgba(0,0,0,0.55),0 2px 10px rgba(74,144,226,0.65),0 0 18px rgba(74,144,226,0.5)}
 .r-c3::before{content:'';position:absolute;inset:3px;border-radius:inherit;border:1px solid rgba(200,230,255,0.4);pointer-events:none}
-.r-c4{background:radial-gradient(circle at 32% 28%,#FF9A5A 0%,#E74C3C 32%,#7A0A0A 100%);color:#FFF2B0;border:2px solid #FF4030;text-shadow:0 0 4px rgba(255,64,48,0.6),0 1px 2px rgba(0,0,0,0.9);box-shadow:inset 0 2px 4px rgba(255,255,255,0.4),inset 0 -2px 4px rgba(0,0,0,0.5),0 2px 10px rgba(231,76,60,0.7),0 0 18px rgba(231,76,60,0.6),0 0 30px rgba(231,76,60,0.4);animation:rankPulseRed 2s ease-in-out infinite}
+.r-c4{background:radial-gradient(circle at 32% 28%,#FF9A5A 0%,#E74C3C 32%,#7A0A0A 100%);color:#FFF2B0;border:2px solid #FF4030;text-shadow:0 0 4px rgba(122,184,240,0.55),0 1px 2px rgba(0,0,0,0.9);box-shadow:inset 0 2px 4px rgba(255,255,255,0.4),inset 0 -2px 4px rgba(0,0,0,0.5),0 2px 10px rgba(231,76,60,0.7),0 0 18px rgba(231,76,60,0.6),0 0 30px rgba(231,76,60,0.4);animation:rankPulseRed 2s ease-in-out infinite}
 @keyframes rankPulseRed{0%,100%{box-shadow:inset 0 2px 4px rgba(255,255,255,0.4),inset 0 -2px 4px rgba(0,0,0,0.5),0 2px 10px rgba(231,76,60,0.7),0 0 18px rgba(231,76,60,0.6),0 0 30px rgba(231,76,60,0.4)}50%{box-shadow:inset 0 2px 4px rgba(255,255,255,0.5),inset 0 -2px 4px rgba(0,0,0,0.5),0 2px 14px rgba(231,76,60,0.95),0 0 28px rgba(231,76,60,0.85),0 0 46px rgba(231,76,60,0.6)}}
 .r-c5{background:radial-gradient(circle at 32% 28%,#FFF5B8 0%,#FFD700 40%,#8B6914 100%);color:#4A0A0A;border:2px solid #FFF2B0;text-shadow:0 1px 2px rgba(255,255,255,0.9),0 0 4px rgba(255,215,0,0.65);box-shadow:inset 0 2px 4px rgba(255,255,255,0.9),inset 0 -2px 4px rgba(139,105,20,0.5),0 2px 12px rgba(255,215,0,0.85),0 0 24px rgba(255,215,0,0.75),0 0 42px rgba(255,215,0,0.5);animation:rankPulseGold 1.8s ease-in-out infinite;overflow:visible}
 .r-c5::before{content:'♛';position:absolute;top:-10px;left:50%;transform:translateX(-50%);color:#FFD700;font-size:14px;line-height:1;text-shadow:0 0 6px #FFD700,0 0 14px #FF8800,0 1px 2px rgba(0,0,0,0.95);animation:crownGlow 2s ease-in-out infinite;z-index:2;pointer-events:none}
@@ -518,7 +518,7 @@ body.friendly-match #friendly-banner{display:block}
 .sm-frame-r2{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #E8E8E8,0 0 7px rgba(255,255,255,0.55) !important}
 .sm-frame-r3{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #4A90E2,0 0 9px rgba(74,144,226,0.6) !important}
 .sm-frame-r4{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #E74C3C,0 0 10px rgba(231,76,60,0.7) !important}
-.sm-frame-r5{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #FFD700,0 0 12px(255,215,0,0.75) !important}
+.sm-frame-r5{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #FFD700,0 0 12px rgba(255,215,0,0.75) !important}
 .sm-frame-r6{box-shadow:0 0 0 1px #0a0505,0 0 0 2px #FFFFFF,0 0 12px rgba(155,89,182,0.85) !important}
 @media (max-width:360px){.lb-hero-avatar{width:100px;height:100px;font-size:46px}.lb-hero-name{font-size:18px}.lb-btn-main{font-size:17px;padding:14px 16px}.lb-icon-btn-card{padding:10px 4px}.lb-icon-btn-card .ib-ic{font-size:22px}}
    </style></head><body>
@@ -1533,12 +1533,32 @@ if(!S.id){S.id=Math.floor(100000+Math.random()*900000).toString();}
 const save=()=>{try{localStorage.setItem('cotuong',JSON.stringify(S))}catch(e){}};
 const stat=(isWin,points)=>{if(isWin)S.w++;else S.l++;S.pts+=points;if(S.pts<0)S.pts=0;save();updateDBProfile();};
 
-/* ===== ÂM THANH ===== */
+/* ===== ÂM THANH PHƯƠNG ÁN A NÂNG CẤP (TRONG TRẺO, KHÔNG RÈ NHƯNG CỰC KỲ CÓ LỰC & ĐẦM CHẮC) ===== */
 let AC,sfxOn=(S.sfxOn!==undefined)?S.sfxOn:true,master;
-const ac=()=>{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(!master){master=AC.createGain();master.gain.value=0.8;master.connect(AC.destination);}if(AC.state=='suspended')AC.resume();return AC;};
+const ac=()=>{
+  AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+  if(!master){
+    const comp=AC.createDynamicsCompressor();
+    comp.threshold.value=-6;
+    comp.knee.value=12;
+    comp.ratio.value=8;
+    comp.attack.value=0.001;
+    comp.release.value=0.14;
+    master=AC.createGain();
+    master.gain.value=1.45;
+    master.connect(comp).connect(AC.destination);
+  }
+  if(AC.state=='suspended')AC.resume();
+  return AC;
+};
 let NOISE_BUF=null;
 function noiseNode(a,t,d,v,f,q,dest){
-  if(!NOISE_BUF){const n=a.sampleRate*2|0;NOISE_BUF=a.createBuffer(1,n,a.sampleRate);const w=NOISE_BUF.getChannelData(0);for(let i=0;i<n;i++)w[i]=Math.random()*2-1;}
+  if(!NOISE_BUF){
+    const n=a.sampleRate*2|0;
+    NOISE_BUF=a.createBuffer(1,n,a.sampleRate);
+    const w=NOISE_BUF.getChannelData(0);
+    for(let i=0;i<n;i++)w[i]=(Math.random()*2-1)*0.7;
+  }
   const startTime=a.currentTime+t;
   const src=a.createBufferSource();
   src.buffer=NOISE_BUF;
@@ -1547,35 +1567,106 @@ function noiseNode(a,t,d,v,f,q,dest){
   bf.type='bandpass';
   bf.frequency.value=f;
   bf.Q.value=q||1;
+  const lp=a.createBiquadFilter();
+  lp.type='lowpass';
+  lp.frequency.value=Math.min(2800,f*1.9);
   const g=a.createGain();
-  g.gain.setValueAtTime(0,startTime);
-  g.gain.linearRampToValueAtTime(v,startTime+.001);
-  g.gain.exponentialRampToValueAtTime(.001,startTime+d);
-  src.connect(bf).connect(g).connect(dest);
+  g.gain.setValueAtTime(0.0001,startTime);
+  g.gain.linearRampToValueAtTime(Math.min(0.95,v),startTime+0.0015);
+  g.gain.exponentialRampToValueAtTime(0.0001,startTime+d);
+  src.connect(bf).connect(lp).connect(g).connect(dest);
   src.start(startTime,offset,d);
 }
-let CHAIN=null;
-function getChain(){
-  if(CHAIN)return CHAIN;
-  const a=ac();
-  const lp=a.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2500;lp.Q.value=0.7;
-  const boost=a.createGain();boost.gain.value=1.0;
-  const comp=a.createDynamicsCompressor();
-  comp.threshold.value=-15;comp.knee.value=10;comp.ratio.value=6;comp.attack.value=.005;comp.release.value=.25;
-  boost.connect(lp).connect(comp).connect(master);
-  const metalFilter=a.createBiquadFilter();metalFilter.type='highpass';metalFilter.frequency.value=1000;
-  const metal=a.createGain();metal.gain.value=0.8;
-  metal.connect(metalFilter).connect(boost);
-  return CHAIN={boost,metal};
+function woodResonance(a,t,fStart,fEnd,dur,vol,dest,waveType='sine'){
+  const startTime=a.currentTime+t;
+  const osc=a.createOscillator();
+  osc.type=waveType;
+  osc.frequency.setValueAtTime(fStart,startTime);
+  osc.frequency.exponentialRampToValueAtTime(Math.max(24,fEnd),startTime+dur);
+  const lp=a.createBiquadFilter();
+  lp.type='lowpass';
+  lp.frequency.value=fStart*1.8;
+  const g=a.createGain();
+  g.gain.setValueAtTime(0.0001,startTime);
+  g.gain.linearRampToValueAtTime(Math.min(0.95,vol),startTime+0.0015);
+  g.gain.exponentialRampToValueAtTime(0.0001,startTime+dur);
+  osc.connect(lp).connect(g).connect(dest);
+  osc.start(startTime);
+  osc.stop(startTime+dur+0.01);
 }
+function bronzeBell(a,t,baseFreq,dur,vol,dest){
+  const ratios=[1, 1.5, 2.02];
+  const amps=[1, 0.5, 0.25];
+  ratios.forEach((r,idx)=>{
+    const startTime=a.currentTime+t;
+    const osc=a.createOscillator();
+    osc.type='sine';
+    osc.frequency.setValueAtTime(baseFreq*r,startTime);
+    const lp=a.createBiquadFilter();
+    lp.type='lowpass';
+    lp.frequency.value=2100;
+    const g=a.createGain();
+    const peak=Math.min(0.75,vol*amps[idx]);
+    const d=dur/(1+idx*0.35);
+    g.gain.setValueAtTime(0.0001,startTime);
+    g.gain.linearRampToValueAtTime(peak,startTime+0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001,startTime+d);
+    osc.connect(lp).connect(g).connect(dest);
+    osc.start(startTime);
+    osc.stop(startTime+d+0.02);
+  });
+}
+
 function sfx(k){
   if(!sfxOn)return;
   try{
-    if(k=='sel'){noiseNode(ac(),0,0.03,0.6,1200,0.5,master);}
-    if(k=='move'){noiseNode(ac(),0,0.06,1.5,400,0.5,master);noiseNode(ac(),0,0.02,0.5,1200,0.5,master);}
-    if(k=='cap'){noiseNode(ac(),0,0.08,2.0,300,0.5,master);noiseNode(ac(),0,0.03,1.0,1500,0.5,master);}
-    if(k=='check'){const a=ac();const{boost,metal}=getChain();noiseNode(a,0,0.15,0.3,1200,2,metal);noiseNode(a,0.05,0.4,0.2,800,1.5,metal);noiseNode(a,0,0.3,0.8,200,1,boost);}
-    if(k=='checkmate'){const a=ac();const{boost,metal}=getChain();noiseNode(a,0,0.4,1.5,150,0.5,boost);noiseNode(a,0.1,0.5,1.0,100,0.5,boost);noiseNode(a,0,0.3,0.8,1000,1,metal);noiseNode(a,0.2,0.4,0.6,2000,1,metal);}
+    const a=ac();
+    if(k=='sel'){
+      // Gõ chọn quân cờ rõ, nảy và chắc tay
+      woodResonance(a,0,420,150,0.038,0.68,master,'triangle');
+      woodResonance(a,0,180,75,0.042,0.52,master,'sine');
+      noiseNode(a,0,0.022,0.38,950,1.4,master);
+    }
+    if(k=='move'||k=='start'){
+      // Đặt quân cờ gỗ đặc nện xuống mặt bàn: có lực đập Sub-bass + tiếng thân gỗ đanh chắc
+      woodResonance(a,0,145,42,0.095,0.88,master,'sine');
+      woodResonance(a,0,260,78,0.075,0.76,master,'triangle');
+      woodResonance(a,0.002,520,165,0.045,0.48,master,'sine');
+      noiseNode(a,0,0.042,0.55,720,1.1,master);
+    }
+    if(k=='cap'){
+      // Ăn quân: 2 quân gỗ va đập cực mạnh + chấn động mặt bàn sâu, dứt khoát
+      woodResonance(a,0,340,105,0.055,0.78,master,'triangle');
+      noiseNode(a,0,0.028,0.58,1100,1.3,master);
+      woodResonance(a,0.018,135,36,0.125,0.95,master,'sine');
+      woodResonance(a,0.018,240,68,0.09,0.82,master,'triangle');
+      woodResonance(a,0.02,480,140,0.055,0.52,master,'sine');
+      noiseNode(a,0.018,0.055,0.68,620,1.0,master);
+    }
+    if(k=='check'){
+      // Chiếu tướng: Quân cờ đập mạnh + Trống trận trầm hùng + Chuông đồng vang dày
+      woodResonance(a,0,140,38,0.11,0.9,master,'sine');
+      woodResonance(a,0,250,72,0.08,0.75,master,'triangle');
+      woodResonance(a,0.01,115,34,0.32,0.88,master,'sine');
+      bronzeBell(a,0.012,528,0.68,0.62,master);
+    }
+    if(k=='check2'){
+      // Song chiếu: 2 nhịp chuông đồng + trống trận dồn dập uy lực
+      woodResonance(a,0,140,38,0.11,0.9,master,'sine');
+      woodResonance(a,0.01,120,34,0.36,0.92,master,'sine');
+      bronzeBell(a,0.01,528,0.58,0.58,master);
+      bronzeBell(a,0.075,660,0.68,0.65,master);
+    }
+    if(k=='checkmate'){
+      // Tuyệt sát: Nhát chém gió + Đại cổ trầm rền vang + Đại hồng chung + Đóng ấn đá nặng
+      noiseNode(a,0,0.2,0.62,540,0.85,master);
+      woodResonance(a,0.18,105,30,0.68,0.95,master,'sine');
+      woodResonance(a,0.18,195,52,0.35,0.78,master,'triangle');
+      bronzeBell(a,0.2,396,1.45,0.68,master);
+      woodResonance(a,0.88,135,38,0.18,0.88,master,'sine');
+      woodResonance(a,0.88,260,75,0.11,0.72,master,'triangle');
+      noiseNode(a,0.88,0.07,0.62,520,1.1,master);
+    }
   }catch(e){}
 }
 function syncSoundUI(){
@@ -1832,8 +1923,9 @@ function tick(){
   if(over||isSpectating)return stopClock();
   const now=performance.now();let dt=now-lastTick;lastTick=now;
   if(!$('#lobby').hidden)return;
+  if(document.visibilityState==='hidden')return;
   if(isOnline && !bothPlayersReady) return;
-  if(!isOnline&&dt>1000)dt=200;
+  if(dt>1000)dt=200;
   // F3: mất mạng → đóng băng đồng hồ, sẽ đồng bộ lại khi reconnect
   if(isOnline && !isFirebaseConnected) return;
   clock[turn]-=dt;pmv[turn]-=dt;
@@ -1993,7 +2085,9 @@ async function executePlay(m,isRemote=false,remoteClocks=null){
   turn=1-turn;pmv[turn]=PERMV;mark(m);
   lastTick=performance.now();
   updateTimerDisplay();
-  if(!willCheck)sfx(v?'cap':'move');
+  if(!willCheck){
+    sfx(v?'cap':'move');
+  }
   await after();
 }
 async function after(){
@@ -2003,7 +2097,7 @@ async function after(){
   if(ck){
     const attackers=getAttackers(turn);
     if(over){sfx('checkmate');trạmTuongVisual();}
-    else if(attackers.length>=2){sfx('check');checkVisualDouble(attackers);}
+    else if(attackers.length>=2){sfx('check2');checkVisualDouble(attackers);}
     else{sfx('check');checkVisual(attackers[0]||'r');}
   }
   if(over){stopClock();busy=false;await sleep(ck?3920:700);return finish(ck?'chk':'nomove',1-turn);}
@@ -2480,7 +2574,7 @@ function listenFriendRequests(){
     pendingFriendReq={uid:fromUid, ...req};
     $('#friend-req-content').innerHTML=`<b>${req.name||'Kỳ thủ'}</b> (ID: ${req.id||'------'})<br>muốn kết bạn với bạn!`;
     $('#friend-req-modal').classList.add('open');
-    sfx('check');
+    sfx('sel');
   });
 }
 
@@ -2525,7 +2619,7 @@ $('#btn-accept-chal').onclick=async()=>{
   sfx('sel');if(!incomingChallengeData)return;
   const roomId='friend_'+Date.now();
   myColor=1;
-  await db.ref('rooms/'+roomId).set({player1:myPlayerId,player2:incomingChallengeData.from,turn:1,ranked:false,createdAt:Date.now()});
+  await db.ref('rooms/'+roomId).set({player1:myPlayerId,player2:incomingChallengeData.from,turn:1,ranked:false,gameIndex:0,createdAt:Date.now()});
   await db.ref('challenges/'+myPlayerId).update({status:'accepted',roomId:roomId});
   $('#incoming-modal').classList.remove('open');
   isRanked=false;
@@ -2638,7 +2732,7 @@ async function findMatch(){
       
       if(myPlayerId<oppUid){
         console.log('[Match] Owner. room='+roomId+' opp='+oppUid.substring(0,8));
-        await db.ref('rooms/'+roomId).set({player1:myPlayerId,player2:oppUid,turn:1,ranked:true,createdAt:Date.now()});
+        await db.ref('rooms/'+roomId).set({player1:myPlayerId,player2:oppUid,turn:1,ranked:true,gameIndex:0,createdAt:Date.now()});
         await db.ref('matchmaking/'+oppUid).update({matched:true,roomId:roomId,opponent:myPlayerId});
         try{
           db.ref('matchmaking/'+myPlayerId).onDisconnect().cancel();
@@ -2849,8 +2943,10 @@ async function joinFirebaseRoom(roomId){
   $('#end').hidden=true;
   $('#chat-history-box').innerHTML='<div style="color:#777;text-align:center">Chưa có tin nhắn</div>';
 
-  // Nếu ván cờ đã có nước đi (kết nối lại giữa trận), cho phép đánh tiếp luôn
-  if(entries.length>0){
+  const readyObj=(roomData&&roomData.ready)?roomData.ready:{};
+  const bothReadyInDb=!!(roomPlayer1&&roomPlayer2&&readyObj[roomPlayer1]&&readyObj[roomPlayer2]);
+
+  if(entries.length>0||bothReadyInDb){
     bothPlayersReady=true;
     $('#ready-overlay').hidden=true;
   }else{
@@ -2888,8 +2984,9 @@ async function joinFirebaseRoom(roomId){
     }
   });
 
-  // Lắng nghe Sẵn sàng Tái đấu (Rematch) sau khi kết thúc ván
-  let currentKnownGameIdx = (roomData && roomData.gameIndex) ? roomData.gameIndex : 0;
+  // Lắng nghe Sẵn sàng Tái đấu (Rematch) KHÔNG GIỚI HẠN SỐ LẦN
+  let currentKnownGameIdx = (roomData && typeof roomData.gameIndex === 'number') ? roomData.gameIndex : 0;
+  let rematchResetting = false;
   roomRef.child('rematch').on('value',async snap=>{
     const rm=snap.val()||{};
     const oppUid=(myPlayerId===roomPlayer1)?roomPlayer2:roomPlayer1;
@@ -2897,23 +2994,34 @@ async function joinFirebaseRoom(roomId){
     const btn=$('#again');
     if(over&&isOnline&&btn){
       const cnt=(meRm?1:0)+(oppRm?1:0);
+      btn.disabled=meRm;
       btn.textContent=meRm?`Đang chờ đối thủ (${cnt}/2)...`:`🔄 Sẵn sàng ván mới (${cnt}/2)`;
     }
-    if(meRm&&oppRm&&myPlayerId===roomPlayer1){
-      const newP1=roomPlayer2,newP2=roomPlayer1;
-      await roomRef.update({
-        player1:newP1,
-        player2:newP2,
-        turn:1,
-        move:null,
-        moveHistory:null,
-        surrender:null,
-        timeout:null,
-        drawOffer:null,
-        rematch:null,
-        ready:{[newP1]:true,[newP2]:true},
-        gameIndex:currentKnownGameIdx+1
-      });
+    // Dùng so sánh UID cố định (myPlayerId < oppUid) để luôn có đúng 1 máy đứng ra khởi tạo ván mới ở mọi lần tái đấu
+    if(meRm&&oppRm&&oppUid&&myPlayerId<oppUid&&!rematchResetting){
+      rematchResetting=true;
+      try{
+        const latestSnap=await roomRef.once('value');
+        const latestRoom=latestSnap.val()||{};
+        const nextIdx=((typeof latestRoom.gameIndex==='number')?latestRoom.gameIndex:currentKnownGameIdx)+1;
+        const newP1=latestRoom.player2||roomPlayer2;
+        const newP2=latestRoom.player1||roomPlayer1;
+        await roomRef.update({
+          player1:newP1,
+          player2:newP2,
+          turn:1,
+          move:null,
+          moveHistory:null,
+          surrender:null,
+          timeout:null,
+          drawOffer:null,
+          rematch:null,
+          leave:null,
+          ready:{[newP1]:true,[newP2]:true},
+          gameIndex:nextIdx
+        });
+      }catch(e){console.error('[Rematch] error:',e);}
+      rematchResetting=false;
     }
   });
 
@@ -2921,6 +3029,7 @@ async function joinFirebaseRoom(roomId){
     const idx=snap.val();
     if(typeof idx==='number'&&idx>currentKnownGameIdx){
       currentKnownGameIdx=idx;
+      rematchResetting=false;
       roomRef.once('value',rsnap=>{
         const rd=rsnap.val();
         if(!rd)return;
@@ -2930,10 +3039,13 @@ async function joinFirebaseRoom(roomId){
         bothPlayersReady=true;
         B=init();hist=[];sel=null;over=false;busy=false;turn=1;
         clock=[TOTAL,TOTAL];pmv=[PERMV,PERMV];
+        const againBtn=$('#again');
+        if(againBtn){againBtn.disabled=false;againBtn.textContent='🔄 Sẵn sàng ván mới';}
         $('#end').hidden=true;
         $('#ready-overlay').hidden=true;
+        $('#draw-req-modal').classList.remove('open');
         rebuild();mark();ui();updateTimerDisplay();startClock();
-        sfx('check');
+        sfx('move');
       });
     }
   });
@@ -2996,6 +3108,60 @@ async function joinFirebaseRoom(roomId){
   });
 }
 
+/* ===== TỰ ĐỘNG KẾT NỐI LẠI KHI THOÁT RA MÀN HÌNH CHÍNH ĐIỆN THOẠI RỒI QUAY LẠI ===== */
+let resumeCheckInFlight = false;
+async function checkAndResumeActiveMatch(){
+  if(resumeCheckInFlight||!db||!auth||!auth.currentUser)return;
+  resumeCheckInFlight=true;
+  try{
+    if(firebase.database){try{db.goOnline();}catch(e){}}
+    if(AC&&AC.state==='suspended'){try{AC.resume();}catch(e){}}
+    lastTick=performance.now();
+
+    let targetRoom = currentRoomId || localStorage.getItem('currentRoomId');
+    if(!targetRoom){
+      const inMatchSnap = await db.ref('users/'+myPlayerId+'/inMatch').once('value');
+      targetRoom = inMatchSnap.val();
+    }
+    if(targetRoom){
+      const snap = await db.ref('rooms/'+targetRoom).once('value');
+      if(snap.exists()){
+        const room = snap.val();
+        if(room.leave && room.leave !== myPlayerId && (room.surrender || room.timeout)){
+          localStorage.removeItem('currentRoomId');
+          db.ref('users/'+myPlayerId+'/inMatch').remove().catch(()=>{});
+        }else{
+          myColor = (room.player1 === myPlayerId) ? 1 : 0;
+          const oppUid = (myColor === 1) ? room.player2 : room.player1;
+          await loadOpponentInfo(oppUid, myColor===1 ? '將' : '帥');
+          await joinFirebaseRoom(targetRoom);
+        }
+      }else{
+        localStorage.removeItem('currentRoomId');
+        db.ref('users/'+myPlayerId+'/inMatch').remove().catch(()=>{});
+      }
+    }
+  }catch(e){
+    console.warn('[ResumeCheck] error:',e);
+  }
+  resumeCheckInFlight=false;
+}
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){
+    lastTick=performance.now();
+    checkAndResumeActiveMatch();
+  }
+});
+window.addEventListener('pageshow',()=>{
+  lastTick=performance.now();
+  checkAndResumeActiveMatch();
+});
+window.addEventListener('online',()=>{
+  lastTick=performance.now();
+  checkAndResumeActiveMatch();
+});
+
 /* ===== AUTH UI ===== */
 document.querySelectorAll('.auth-tab').forEach(tab=>{
   tab.onclick=()=>{document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');const target=tab.dataset.tab;$('#auth-login-form').hidden=(target!=='login');$('#auth-register-form').hidden=(target!=='register');$('#auth-error').textContent='';};
@@ -3019,7 +3185,6 @@ if(initFirebase()&&auth){
     updateSettingsAuthUI();
     if(user){
       myPlayerId=user.uid;
-      let fbInMatch=null;
       if(db){
         try{
           const usnap=await db.ref('users/'+myPlayerId).once('value');
@@ -3032,7 +3197,6 @@ if(initFirebase()&&auth){
             if(typeof ud.w==='number'&&ud.w>S.w)S.w=ud.w;
             if(typeof ud.l==='number'&&ud.l>S.l)S.l=ud.l;
             if(ud.friends)S.friends=Object.assign({},S.friends,ud.friends);
-            if(ud.inMatch)fbInMatch=ud.inMatch;
             save();
           }
         }catch(e){}
@@ -3042,35 +3206,18 @@ if(initFirebase()&&auth){
       listenFriends();
       listenFriendRequests();
       
-      // Khôi phục phòng đang đánh dở khi vô tình thoát web / tải lại trang
-      const savedRoom = localStorage.getItem('currentRoomId') || fbInMatch;
-      if(savedRoom && !isOnline){
-        db.ref('rooms/'+savedRoom).once('value', snap=>{
-          if(snap.exists()){
-            const room = snap.val();
-            if(room.surrender || room.timeout){
-              localStorage.removeItem('currentRoomId');
-              db.ref('users/'+myPlayerId+'/inMatch').remove().catch(()=>{});
-              return;
-            }
-            myColor = (room.player1 === myPlayerId) ? 1 : 0;
-            const oppUid = (myColor === 1) ? room.player2 : room.player1;
-            loadOpponentInfo(oppUid, myColor===1 ? '將' : '帥').then(()=>{
-              joinFirebaseRoom(savedRoom);
-            });
-          }else{
-            localStorage.removeItem('currentRoomId');
-            db.ref('users/'+myPlayerId+'/inMatch').remove().catch(()=>{});
-          }
-        });
-      }
+      // Tự động kiểm tra và kết nối lại phòng đang chơi
+      checkAndResumeActiveMatch();
     }
   });
 }
 
 /* ===== INIT ===== */
 try{
-  document.addEventListener('pointerdown',function initAudio(){ac();document.removeEventListener('pointerdown',initAudio);},{once:true});
+  document.addEventListener('pointerdown',function initAudio(){
+    ac();
+    document.removeEventListener('pointerdown',initAudio);
+  },{once:true});
   cacheTimerEls();
   syncSoundUI();
   drawBoard();
@@ -3129,4 +3276,4 @@ document.getElementById("btn").addEventListener("click", () => {
 }
   </script>
 </body>
-  </html>
+      </html>
