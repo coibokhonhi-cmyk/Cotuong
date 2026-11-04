@@ -3723,7 +3723,7 @@ function finish(reason,winner){
   }else if(isOnline){
     isWin=(winner===myColor);
     h1.textContent=isWin?'THẮNG':'THUA';
-    const rText=reason==='timeout'?'Hết thời gian':(reason==='surrender'?'Đầu hàng':'Chiếu bí');
+    const rText=reason==='timeout'?'Hết thời gian':(reason==='surrender'?'Đầu hàng':(reason==='perpetual'?'Chiếu dai quá 5 lần':'Chiếu bí'));
     if(isRanked){
       if(canScoreCurrentOnlineMatch()){
         markMatchResultScored(currentRoomId,currentActiveGameIdx);
@@ -3740,7 +3740,7 @@ function finish(reason,winner){
     }else{desc.textContent=`${rText} (Giao hữu)`;}
   }else{
     h1.textContent=winner===1?'ĐỎ THẮNG':'ĐEN THẮNG';
-    desc.textContent=reason==='timeout'?'Hết thời gian':'Chiếu bí';
+    desc.textContent=reason==='timeout'?'Hết thời gian':(reason==='perpetual'?'Xử thua vì chiếu dai (quá 5 lần)':'Chiếu bí');
   }
   endEl.hidden=false;
   ui();
@@ -7749,9 +7749,793 @@ try{
      PHẦN 3: INLINE WEB WORKER CHẠY NGẦM 100% + ENGINE ĐẠI SƯ CỜ TƯỚNG (ZERO-LAG)
      Chạy trên nhân CPU riêng biệt (Background Thread) -> Giao diện mượt 60 FPS tuyệt đối!
      ========================================================================= */
-  function createAiEngineWorkerCode() {
-    return `
-      const INIT = ['rheakaehr','.........','.c.....c.','p.p.p.p.p','.........','.........','P.P.P.P.P','.C.....C.','.........','RHEAKAEHR'];
+  function createSwV2Namespace() {
+    return (function() {
+// ═══════════════════════════════════════════════════════════════════════════
+// 1. CONSTANTS
+// ═══════════════════════════════════════════════════════════════════════════
+const RED=1,BLACK=-1;
+const KING=1,ADVISOR=2,BISHOP=3,KNIGHT=4,ROOK=5,CANNON=6,PAWN=7;
+const INF=30000,MATE=25000,MATE_TH=24000,MAX_PLY=64;
+const TT_BITS=20,TT_MASK=(1<<TT_BITS)-1;
+const MAX_MOVES=128;
+
+const MG_VAL=[0,0,200,200,420,900,450,100];
+const EG_VAL=[0,0,200,200,440,880,400,200];
+const SEE_VAL=[0,10000,200,200,420,900,450,100];
+const PHASE_W=[0,0,1,1,2,4,2,1];
+const TOTAL_PHASE=50;
+
+const PIECE_CHAR={1:'帥',2:'仕',3:'相',4:'馬',5:'車',6:'炮',7:'兵',
+'-1':'將','-2':'士','-3':'象','-4':'馬','-5':'車','-6':'砲','-7':'卒'};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 2. PST TABLES
+// ═══════════════════════════════════════════════════════════════════════════
+const MG_PST_RAW={
+[KING]:[0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,1,5,1,0,0,0, 0,0,0,-8,-8,-8,0,0,0, 0,0,0,2,12,2,0,0,0],
+[ADVISOR]:[0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,20,0,20,0,0,0, 0,0,0,0,25,0,0,0,0, 0,0,0,20,0,20,0,0,0],
+[BISHOP]:[0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,20,0,0,0,20,0,0, 0,0,0,0,0,0,0,0,0, 18,0,0,0,25,0,0,0,18, 0,0,0,0,0,0,0,0,0, 0,0,20,0,0,0,20,0,0],
+[KNIGHT]:[0,-4,0,0,0,0,0,-4,0, 0,2,4,4,-2,4,4,2,0, 4,2,12,14,12,14,12,2,4, 2,10,16,22,18,22,16,10,2, 4,12,16,18,18,18,16,12,4, 2,8,14,14,16,14,14,8,2, 0,4,8,10,12,10,8,4,0, 2,2,6,4,8,4,6,2,2, -4,0,4,2,-6,2,4,0,-4, -8,-4,0,0,0,0,0,-4,-8],
+[ROOK]:[14,14,12,18,16,18,12,14,14, 16,20,18,24,26,24,18,20,16, 12,12,12,18,18,18,12,12,12, 12,18,16,22,22,22,16,18,12, 12,14,12,18,18,18,12,14,12, 12,16,14,20,20,20,14,16,12, 6,10,8,14,14,14,8,10,6, 4,8,6,14,12,14,6,8,4, 8,4,8,16,8,16,8,4,8, -2,10,6,14,12,14,6,10,-2],
+[CANNON]:[6,4,0,-10,-12,-10,0,4,6, 2,2,0,-4,-14,-4,0,2,2, 2,2,0,-10,-8,-10,0,2,2, 0,0,-2,4,10,4,-2,0,0, 0,0,0,2,8,2,0,0,0, -2,0,4,2,6,2,4,0,-2, 0,0,0,2,4,2,0,0,0, 4,0,8,6,10,6,8,0,4, 0,2,4,6,6,6,4,2,0, 0,0,2,6,6,6,2,0,0],
+[PAWN]:[6,12,18,24,30,24,18,12,6, 30,50,65,80,90,80,65,50,30, 30,50,60,75,85,75,60,50,30, 25,40,50,65,70,65,50,40,25, 20,30,40,50,55,50,40,30,20, 0,0,0,0,0,0,0,0,0, -2,0,-2,0,6,0,-2,0,-2, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0]
+};
+const EG_PST_RAW={
+[KING]:new Array(90).fill(0),[ADVISOR]:new Array(90).fill(0),[BISHOP]:new Array(90).fill(0),
+[KNIGHT]:[0,0,0,0,0,0,0,0,0, 0,4,6,6,4,6,6,4,0, 2,6,14,16,14,16,14,6,2, 4,12,18,24,20,24,18,12,4, 6,14,20,22,22,22,20,14,6, 4,10,16,16,18,16,16,10,4, 2,6,10,12,14,12,10,6,2, 2,2,6,4,8,4,6,2,2, 0,0,2,2,0,2,2,0,0, -4,-2,0,0,0,0,0,-2,-4],
+[ROOK]:[10,10,10,15,15,15,10,10,10, 10,15,15,20,20,20,15,15,10, 10,15,15,20,20,20,15,15,10, 10,15,15,20,20,20,15,15,10, 10,12,12,18,18,18,12,12,10, 8,10,10,15,15,15,10,10,8, 6,8,8,12,12,12,8,8,6, 4,6,6,10,10,10,6,6,4, 4,4,4,8,8,8,4,4,4, 2,4,4,6,6,6,4,4,2],
+[CANNON]:[4,2,0,-4,-6,-4,0,2,4, 2,2,0,-2,-8,-2,0,2,2, 2,0,0,-4,-6,-4,0,0,2, 0,0,-2,2,6,2,-2,0,0, 0,0,0,2,4,2,0,0,0, -2,0,2,2,4,2,2,0,-2, 0,0,0,2,2,2,0,0,0, 2,0,4,4,6,4,4,0,2, 0,2,2,4,4,4,2,2,0, 0,0,2,4,4,4,2,0,0],
+[PAWN]:[20,30,40,50,60,50,40,30,20, 40,60,80,100,120,100,80,60,40, 50,70,90,110,130,110,90,70,50, 40,60,80,100,110,100,80,60,40, 30,50,70,90,100,90,70,50,30, 20,30,50,70,80,70,50,30,20, 10,20,30,40,50,40,30,20,10, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0]
+};
+
+const MG_PST=new Int32Array(15*90),EG_PST=new Int32Array(15*90);
+for(let p=1;p<=7;p++){
+  for(let sq=0;sq<90;sq++){
+    const r=Math.floor(sq/9),c=sq%9,mir=(9-r)*9+c;
+    MG_PST[(p+7)*90+sq]=MG_VAL[p]+MG_PST_RAW[p][sq];
+    MG_PST[(-p+7)*90+sq]=-(MG_VAL[p]+MG_PST_RAW[p][mir]);
+    EG_PST[(p+7)*90+sq]=EG_VAL[p]+EG_PST_RAW[p][sq];
+    EG_PST[(-p+7)*90+sq]=-(EG_VAL[p]+EG_PST_RAW[p][mir]);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 3. ZOBRIST (32-bit)
+// ═══════════════════════════════════════════════════════════════════════════
+const ZOB_PIECE=new Int32Array(15*90),ZOB_SIDE=new Int32Array(1);
+(function(){
+  let s=0x9e3779b9;
+  const rnd=()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return s|0;};
+  for(let i=0;i<ZOB_PIECE.length;i++)ZOB_PIECE[i]=rnd();
+  ZOB_SIDE[0]=rnd();
+})();
+const zp=(p,sq)=>ZOB_PIECE[(p+7)*90+sq];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 4. TRANSPOSITION TABLE
+// ═══════════════════════════════════════════════════════════════════════════
+const TT_LOCK=new Int32Array(1<<TT_BITS);
+const TT_MOVE=new Uint16Array(1<<TT_BITS);
+const TT_SCORE=new Int32Array(1<<TT_BITS);
+const TT_DEPTH=new Int8Array(1<<TT_BITS);
+const TT_FLAG=new Uint8Array(1<<TT_BITS);
+const TT_GEN=new Uint8Array(1<<TT_BITS);
+let ttGen=0;
+function ttClear(){TT_LOCK.fill(0);TT_DEPTH.fill(-1);TT_GEN.fill(0);ttGen=0;}
+
+function ttProbe(h,depth,alpha,beta,ply){
+  const i=h&TT_MASK;
+  if(TT_DEPTH[i]===-1||TT_LOCK[i]!==h)return[null,0];
+  const tm=TT_MOVE[i];
+  if(TT_DEPTH[i]>=depth){
+    let s=TT_SCORE[i];
+    if(s>MATE_TH)s-=ply; else if(s<-MATE_TH)s+=ply;
+    const f=TT_FLAG[i];
+    if(f===0)return[s,tm];
+    if(f===1&&s<=alpha)return[alpha,tm];
+    if(f===2&&s>=beta)return[beta,tm];
+  }
+  return[null,tm];
+}
+function ttStore(h,depth,score,flag,bestMove,ply){
+  const i=h&TT_MASK;
+  if(TT_DEPTH[i]===-1||TT_GEN[i]!==ttGen||depth>=TT_DEPTH[i]||flag===0){
+    if(score>MATE_TH)score+=ply; else if(score<-MATE_TH)score-=ply;
+    TT_LOCK[i]=h;TT_MOVE[i]=bestMove;TT_SCORE[i]=score;
+    TT_DEPTH[i]=depth;TT_FLAG[i]=flag;TT_GEN[i]=ttGen;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 5. MOVE TABLES
+// ═══════════════════════════════════════════════════════════════════════════
+const KING_MOVES=Array.from({length:90},()=>[]);
+const ADVISOR_MOVES=Array.from({length:90},()=>[]);
+const BISHOP_MOVES=Array.from({length:90},()=>[]);
+const KNIGHT_MOVES=Array.from({length:90},()=>[]);
+const KNIGHT_ATTACK=Array.from({length:90},()=>[]);
+
+for(let sq=0;sq<90;sq++){
+  const r=Math.floor(sq/9),c=sq%9;
+  for(const[dr,dc]of[[-1,0],[1,0],[0,-1],[0,1]]){
+    const nr=r+dr,nc=c+dc;
+    if(nr>=0&&nr<=9&&nc>=3&&nc<=5&&((r<=2&&nr<=2)||(r>=7&&nr>=7)))
+      KING_MOVES[sq].push(nr*9+nc);
+  }
+  for(const[dr,dc]of[[-1,-1],[-1,1],[1,-1],[1,1]]){
+    const nr=r+dr,nc=c+dc;
+    if(nr>=0&&nr<=9&&nc>=3&&nc<=5&&((r<=2&&nr<=2)||(r>=7&&nr>=7)))
+      ADVISOR_MOVES[sq].push(nr*9+nc);
+  }
+  for(const[dr,dc]of[[-2,-2],[-2,2],[2,-2],[2,2]]){
+    const nr=r+dr,nc=c+dc;
+    if(nr>=0&&nr<=9&&nc>=0&&nc<=8&&((r<=4&&nr<=4)||(r>=5&&nr>=5)))
+      BISHOP_MOVES[sq].push([nr*9+nc,(r+dr/2)*9+(c+dc/2)]);
+  }
+  for(const[dr,dc,lr,lc]of[[-2,-1,-1,0],[-2,1,-1,0],[2,-1,1,0],[2,1,1,0],[-1,-2,0,-1],[1,-2,0,-1],[-1,2,0,1],[1,2,0,1]]){
+    const nr=r+dr,nc=c+dc;
+    if(nr>=0&&nr<=9&&nc>=0&&nc<=8){
+      const to=nr*9+nc,leg=(r+lr)*9+(c+lc);
+      KNIGHT_MOVES[sq].push([to,leg]);
+      KNIGHT_ATTACK[to].push([sq,leg]);
+    }
+  }
+}
+
+// LMR table
+const LMR_TABLE=[];
+for(let d=0;d<64;d++){LMR_TABLE[d]=[];for(let m=0;m<64;m++)
+  LMR_TABLE[d][m]=d>=1&&m>=1?Math.floor(0.75+Math.log(d)*Math.log(m)/2.25):0;}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 6. BOARD
+// ═══════════════════════════════════════════════════════════════════════════
+class Board{
+  constructor(fen){
+    this.sq=new Int8Array(90);
+    this.side=RED;this.hash=0;this.mgPst=0;this.egPst=0;this.phase=0;
+    this.redKing=85;this.blackKing=4;this.halfmove=0;
+    this.history=[];this.hashHistory=[];
+    this.setFen(fen||"rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1");
+  }
+  setFen(fen){
+    this.sq.fill(0);this.history=[];this.hashHistory=[];
+    this.mgPst=0;this.egPst=0;this.phase=0;this.halfmove=0;this.hash=0;
+    const map={'r':-5,'n':-4,'b':-3,'a':-2,'k':-1,'c':-6,'p':-7,
+               'R':5,'N':4,'B':3,'A':2,'K':1,'C':6,'P':7};
+    const parts=fen.trim().split(' ');let sq=0;
+    for(const ch of parts[0]){
+      if(ch==='/')continue;
+      if(ch>='0'&&ch<='9')sq+=parseInt(ch);
+      else{const p=map[ch];this.sq[sq]=p;
+        if(p===1)this.redKing=sq; else if(p===-1)this.blackKing=sq;
+        this.mgPst+=MG_PST[(p+7)*90+sq];this.egPst+=EG_PST[(p+7)*90+sq];
+        this.phase+=PHASE_W[Math.abs(p)];this.hash^=zp(p,sq);sq++;}
+    }
+    if(this.phase>TOTAL_PHASE)this.phase=TOTAL_PHASE;
+    this.side=parts[1]==='b'?BLACK:RED;
+    if(this.side===BLACK)this.hash^=ZOB_SIDE[0];
+    this.hashHistory.push(this.hash);
+  }
+  makeMove(m){
+    const f=m>>7,t=m&127;
+    const mv=this.sq[f],cap=this.sq[t];
+    this.history.push([m,cap,this.hash,this.mgPst,this.egPst,this.phase,this.halfmove,this.redKing,this.blackKing]);
+    let h=this.hash^ZOB_SIDE[0];
+    h^=zp(mv,f);h^=zp(mv,t);
+    let mg=this.mgPst-MG_PST[(mv+7)*90+f]+MG_PST[(mv+7)*90+t];
+    let eg=this.egPst-EG_PST[(mv+7)*90+f]+EG_PST[(mv+7)*90+t];
+    let ph=this.phase;
+    if(cap!==0){
+      h^=zp(cap,t);
+      mg-=MG_PST[(cap+7)*90+t];eg-=EG_PST[(cap+7)*90+t];
+      ph-=PHASE_W[Math.abs(cap)];this.halfmove=0;
+    }else this.halfmove++;
+    this.sq[t]=mv;this.sq[f]=0;
+    if(mv===1)this.redKing=t; else if(mv===-1)this.blackKing=t;
+    this.side=-this.side;this.hash=h;this.mgPst=mg;this.egPst=eg;
+    this.phase=Math.max(0,Math.min(TOTAL_PHASE,ph));
+    this.hashHistory.push(h);
+  }
+  undoMove(){
+    if(this.history.length===0)return false;
+    const[m,cap,h,mg,eg,ph,hm,rk,bk]=this.history.pop();
+    this.hashHistory.pop();
+    const f=m>>7,t=m&127;
+    this.sq[f]=this.sq[t];this.sq[t]=cap;
+    this.hash=h;this.mgPst=mg;this.egPst=eg;this.phase=ph;
+    this.halfmove=hm;this.redKing=rk;this.blackKing=bk;this.side=-this.side;
+    return true;
+  }
+  makeNull(){
+    this.history.push([-1,0,this.hash,this.mgPst,this.egPst,this.phase,this.halfmove,this.redKing,this.blackKing]);
+    this.side=-this.side;this.hash^=ZOB_SIDE[0];this.hashHistory.push(this.hash);
+  }
+  undoNull(){
+    const[_,__,h,mg,eg,ph,hm,rk,bk]=this.history.pop();
+    this.hashHistory.pop();this.hash=h;this.mgPst=mg;this.egPst=eg;this.phase=ph;
+    this.halfmove=hm;this.redKing=rk;this.blackKing=bk;this.side=-this.side;
+  }
+  
+  isAttacked(sq,by){
+    const s=this.sq,r=Math.floor(sq/9),c=sq%9;
+    const ep=by===RED?PAWN:-PAWN;
+    if(by===RED){
+      if(r<9&&s[(r+1)*9+c]===ep)return true;
+      if(r<=4){if(c>0&&s[r*9+c-1]===ep)return true;if(c<8&&s[r*9+c+1]===ep)return true;}
+    }else{
+      if(r>0&&s[(r-1)*9+c]===ep)return true;
+      if(r>=5){if(c>0&&s[r*9+c-1]===ep)return true;if(c<8&&s[r*9+c+1]===ep)return true;}
+    }
+    const ek=by===RED?KNIGHT:-KNIGHT;
+    for(const[a,l]of KNIGHT_ATTACK[sq])
+      if(s[a]===ek&&s[l]===0)return true;
+    const er=by===RED?ROOK:-ROOK,ec=by===RED?CANNON:-CANNON,eg=by===RED?KING:-KING;
+    for(const[dr,dc]of[[-1,0],[1,0],[0,-1],[0,1]]){
+      let nr=r+dr,nc=c+dc,jumped=false;
+      while(nr>=0&&nr<=9&&nc>=0&&nc<=8){
+        const p=s[nr*9+nc];
+        if(p!==0){
+          if(!jumped){if(p===er||p===eg)return true;jumped=true;}
+          else{if(p===ec)return true;break;}
+        }
+        nr+=dr;nc+=dc;
+      }
+    }
+    return false;
+  }
+  inCheck(side){
+    side=side||this.side;
+    const ks=side===RED?this.redKing:this.blackKing;
+    return this.isAttacked(ks,-side);
+  }
+  
+  genPseudo(out,capsOnly){
+    let n=0;
+    const s=this.sq,side=this.side;
+    for(let sq=0;sq<90;sq++){
+      const p=s[sq];
+      if(p===0||(p>0)!==(side>0))continue;
+      const ap=Math.abs(p),r=Math.floor(sq/9),c=sq%9;
+      if(ap===ROOK){
+        for(const[dr,dc]of[[-1,0],[1,0],[0,-1],[0,1]]){
+          let nr=r+dr,nc=c+dc;
+          while(nr>=0&&nr<=9&&nc>=0&&nc<=8){
+            const t=nr*9+nc,tg=s[t];
+            if(tg===0){if(!capsOnly)out[n++]=(sq<<7)|t;}
+            else{if((tg>0)!==(side>0))out[n++]=(sq<<7)|t;break;}
+            nr+=dr;nc+=dc;
+          }
+        }
+      }else if(ap===CANNON){
+        for(const[dr,dc]of[[-1,0],[1,0],[0,-1],[0,1]]){
+          let nr=r+dr,nc=c+dc,jumped=false;
+          while(nr>=0&&nr<=9&&nc>=0&&nc<=8){
+            const t=nr*9+nc,tg=s[t];
+            if(!jumped){if(tg===0){if(!capsOnly)out[n++]=(sq<<7)|t;}else jumped=true;}
+            else{if(tg!==0){if((tg>0)!==(side>0))out[n++]=(sq<<7)|t;break;}}
+            nr+=dr;nc+=dc;
+          }
+        }
+      }else if(ap===KNIGHT){
+        for(const[t,l]of KNIGHT_MOVES[sq]){
+          if(s[l]===0){const tg=s[t];
+            if(tg===0){if(!capsOnly)out[n++]=(sq<<7)|t;}
+            else if((tg>0)!==(side>0))out[n++]=(sq<<7)|t;}
+        }
+      }else if(ap===PAWN){
+        const dir=side===RED?-1:1;
+        if((side===RED&&r>0)||(side===BLACK&&r<9)){
+          const t=(r+dir)*9+c,tg=s[t];
+          if(tg===0){if(!capsOnly)out[n++]=(sq<<7)|t;}
+          else if((tg>0)!==(side>0))out[n++]=(sq<<7)|t;
+        }
+        if((side===RED&&r<=4)||(side===BLACK&&r>=5)){
+          for(const dc of[-1,1])if(c+dc>=0&&c+dc<=8){
+            const t=r*9+(c+dc),tg=s[t];
+            if(tg===0){if(!capsOnly)out[n++]=(sq<<7)|t;}
+            else if((tg>0)!==(side>0))out[n++]=(sq<<7)|t;
+          }
+        }
+      }else if(ap===BISHOP){
+        for(const[t,e]of BISHOP_MOVES[sq])if(s[e]===0){
+          const tg=s[t];
+          if(tg===0){if(!capsOnly)out[n++]=(sq<<7)|t;}
+          else if((tg>0)!==(side>0))out[n++]=(sq<<7)|t;
+        }
+      }else if(ap===ADVISOR){
+        for(const t of ADVISOR_MOVES[sq]){const tg=s[t];
+          if(tg===0){if(!capsOnly)out[n++]=(sq<<7)|t;}
+          else if((tg>0)!==(side>0))out[n++]=(sq<<7)|t;}
+      }else if(ap===KING){
+        for(const t of KING_MOVES[sq]){const tg=s[t];
+          if(tg===0){if(!capsOnly)out[n++]=(sq<<7)|t;}
+          else if((tg>0)!==(side>0))out[n++]=(sq<<7)|t;}
+      }
+    }
+    return n;
+  }
+  
+  isRepetition(minReps){
+    minReps=minReps||2;
+    if(this.halfmove>=120)return true;
+    const h=this.hash;let count=0;
+    const lim=Math.min(this.hashHistory.length,this.halfmove+1);
+    const L=this.hashHistory.length;
+    for(let i=1;i<=lim;i++)
+      if(this.hashHistory[L-i]===h){count++;if(count>=minReps)return true;}
+    return false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 7. EVALUATION (Pro base + mobility + king safety + passed pawn)
+// ═══════════════════════════════════════════════════════════════════════════
+function evaluate(b){
+  const ph=b.phase;
+  let score=Math.floor((b.mgPst*ph+b.egPst*(TOTAL_PHASE-ph))/TOTAL_PHASE);
+  const s=b.sq;
+  
+  // --- MOBILITY for Knights (đơn giản, không tốn NPS nhiều) ---
+  let kNight=0;
+  for(let sq=0;sq<90;sq++){
+    const p=s[sq];if(Math.abs(p)!==KNIGHT)continue;
+    let mob=0;
+    for(const[t,l]of KNIGHT_MOVES[sq]){
+      if(s[l]===0){const tg=s[t];
+        if(tg===0||((tg>0)!==(p>0)))mob++;}
+    }
+    kNight+=p>0?mob:-mob;
+  }
+  score+=kNight*3;
+  
+  // --- KING SAFETY (open file trước mặt Tướng) ---
+  if(ph>15){
+    const rkc=b.redKing%9,bkc=b.blackKing%9;
+    const rkr=Math.floor(b.redKing/9),bkr=Math.floor(b.blackKing/9);
+    let rOpen=0,bOpen=0;
+    // Check column in front of each king (toward enemy)
+    for(let rr=rkr-1;rr>=0;rr--)if(s[rr*9+rkc]!==0){rOpen++;break;}
+    for(let rr=bkr+1;rr<=9;rr++)if(s[rr*9+bkc]!==0){bOpen++;break;}
+    if(rOpen===0)score-=15;
+    if(bOpen===0)score+=15;
+    
+    // Advisor/bishop count in palace
+    let rDef=0,bDef=0;
+    for(const sq of[66,68,76,84,86,47,51,63,67,71,83,87]){const p=s[sq];
+      if(p===ADVISOR||p===BISHOP)rDef++;}
+    for(const sq of[3,5,13,21,23,2,6,18,22,26,38,42]){const p=s[sq];
+      if(p===-ADVISOR||p===-BISHOP)bDef++;}
+    if(rDef>=4)score+=25; else if(rDef<=1)score-=30;
+    if(bDef>=4)score-=25; else if(bDef<=1)score+=30;
+  }
+  
+  // --- PASSED PAWN (đơn giản) ---
+  for(let sq=0;sq<90;sq++){
+    const p=s[sq];if(Math.abs(p)!==PAWN)continue;
+    const r=Math.floor(sq/9),c=sq%9;
+    if(p>0&&r<=4){
+      // Red pawn passed enemy lines
+      let blocked=false;
+      for(let rr=0;rr<r;rr++)for(let cc=Math.max(0,c-1);cc<=Math.min(8,c+1);cc++)
+        if(s[rr*9+cc]===-PAWN){blocked=true;break;}
+      if(!blocked)score+=20;
+    }else if(p<0&&r>=5){
+      let blocked=false;
+      for(let rr=r+1;rr<10;rr++)for(let cc=Math.max(0,c-1);cc<=Math.min(8,c+1);cc++)
+        if(s[rr*9+cc]===PAWN){blocked=true;break;}
+      if(!blocked)score-=20;
+    }
+  }
+  
+  const tempo=b.side===RED?10:-10;
+  return b.side===RED?score+tempo:-(score+tempo);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 8. SEARCH
+// ═══════════════════════════════════════════════════════════════════════════
+const SEARCH_STATE={nodes:0,startTime:0,limit:0,aborted:false};
+const killerMoves=Array.from({length:MAX_PLY},()=>[0,0]);
+const historyMoves=new Int32Array(90*90);
+const counterMoves=new Int32Array(90*90);
+
+function resetSearch(){
+  for(let i=0;i<killerMoves.length;i++){killerMoves[i][0]=0;killerMoves[i][1]=0;}
+  historyMoves.fill(0);counterMoves.fill(0);
+}
+
+function checkTime(){
+  if(++SEARCH_STATE.nodes%2048===0)
+    if(performance.now()-SEARCH_STATE.startTime>=SEARCH_STATE.limit)
+      SEARCH_STATE.aborted=true;
+  return SEARCH_STATE.aborted;
+}
+
+function seeApprox(b,m){
+  const f=m>>7,t=m&127;
+  const victim=Math.abs(b.sq[t]),attacker=Math.abs(b.sq[f]);
+  if(victim===0)return 0;
+  const gain=SEE_VAL[victim]-SEE_VAL[attacker];
+  if(gain>=0)return gain+100;
+  if(b.isAttacked(t,-b.side))return gain;
+  return SEE_VAL[victim];
+}
+
+function scoreMove(b,m,ttMove,ply,prevMove){
+  if(m===ttMove)return 2000000;
+  const f=m>>7,t=m&127;
+  const tg=Math.abs(b.sq[t]),at=Math.abs(b.sq[f]);
+  if(tg!==0){
+    const see=seeApprox(b,m);
+    const mvv=10*SEE_VAL[tg]-SEE_VAL[at];
+    return see>=0?1000000+mvv:-100000+mvv;
+  }
+  if(m===killerMoves[ply][0])return 900000;
+  if(m===killerMoves[ply][1])return 850000;
+  if(prevMove!==0){
+    const pf=prevMove>>7,pt=prevMove&127;
+    if(m===counterMoves[pf*90+pt])return 800000;
+  }
+  return historyMoves[f*90+t];
+}
+
+function sortMoves(moves,scores,n){
+  for(let i=1;i<n;i++){
+    const m=moves[i],s=scores[i];let j=i-1;
+    while(j>=0&&scores[j]<s){moves[j+1]=moves[j];scores[j+1]=scores[j];j--;}
+    moves[j+1]=m;scores[j+1]=s;
+  }
+}
+
+function quiesce(b,alpha,beta,ply){
+  if(checkTime())return 0;
+  if(b.isRepetition(2))return 0;
+  if(ply>=MAX_PLY-1)return evaluate(b);
+  
+  const inChk=b.inCheck();
+  if(inChk){
+    const buf=new Int32Array(MAX_MOVES);
+    const n=b.genPseudo(buf,false);
+    const scores=new Int32Array(n);
+    for(let i=0;i<n;i++)scores[i]=scoreMove(b,buf[i],0,ply,0);
+    sortMoves(buf,scores,n);
+    let legal=0;
+    const mover=b.side;
+    for(let i=0;i<n;i++){
+      const m=buf[i];
+      b.makeMove(m);
+      if(b.inCheck(mover)){b.undoMove();continue;}
+      legal++;
+      const s=-quiesce(b,-beta,-alpha,ply+1);
+      b.undoMove();
+      if(SEARCH_STATE.aborted)return 0;
+      if(s>=beta)return beta;
+      if(s>alpha)alpha=s;
+    }
+    if(legal===0)return -MATE+ply;
+    return alpha;
+  }
+  
+  const stand=evaluate(b);
+  if(stand>=beta)return beta;
+  if(stand>alpha)alpha=stand;
+  
+  const buf=new Int32Array(MAX_MOVES);
+  const n=b.genPseudo(buf,true);
+  const scores=new Int32Array(n);
+  for(let i=0;i<n;i++)scores[i]=scoreMove(b,buf[i],0,ply,0);
+  sortMoves(buf,scores,n);
+  const mover=b.side;
+  for(let i=0;i<n;i++){
+    const m=buf[i];
+    const victim=Math.abs(b.sq[m&127]);
+    if(stand+SEE_VAL[victim]+200<alpha)continue;
+    b.makeMove(m);
+    if(b.inCheck(mover)){b.undoMove();continue;}
+    const s=-quiesce(b,-beta,-alpha,ply+1);
+    b.undoMove();
+    if(SEARCH_STATE.aborted)return 0;
+    if(s>=beta)return beta;
+    if(s>alpha)alpha=s;
+  }
+  return alpha;
+}
+
+function negamax(b,depth,alpha,beta,ply,allowNull,prevMove){
+  if(checkTime())return 0;
+  if(ply>0&&b.isRepetition(2))return 0;
+  if(ply>=MAX_PLY-1)return evaluate(b);
+  
+  const isPv=(beta-alpha)>1;
+  const[ttScore,ttMove]=ttProbe(b.hash,depth,alpha,beta,ply);
+  if(ttScore!==null&&ply>0&&!isPv)return ttScore;
+  
+  const inChk=b.inCheck();
+  // FIX: check extension giới hạn ply < 32
+  if(inChk&&ply<32)depth++;
+  
+  if(depth<=0)return quiesce(b,alpha,beta,ply);
+  
+  const se=evaluate(b);
+  
+  // Reverse Futility Pruning
+  if(!isPv&&!inChk&&depth<=5&&se-110*depth>=beta&&Math.abs(beta)<MATE_TH)
+    return se;
+  
+  // Null move
+  if(allowNull&&!isPv&&!inChk&&depth>=3&&se>=beta){
+    const R=2+Math.floor(depth/4);
+    b.makeNull();
+    const ns=-negamax(b,depth-1-R,-beta,-beta+1,ply+1,false,0);
+    b.undoNull();
+    if(SEARCH_STATE.aborted)return 0;
+    if(ns>=beta)return beta;
+  }
+  
+  // IID
+  let ttMove2=ttMove;
+  if(isPv&&ttMove2===0&&depth>=4){
+    negamax(b,depth-2,alpha,beta,ply,false,prevMove);
+    const r2=ttProbe(b.hash,0,alpha,beta,ply);
+    if(r2)ttMove2=r2[1];
+  }
+  
+  const moves=new Int32Array(MAX_MOVES);
+  const n=b.genPseudo(moves,false);
+  const scores=new Int32Array(n);
+  for(let i=0;i<n;i++)scores[i]=scoreMove(b,moves[i],ttMove2,ply,prevMove);
+  sortMoves(moves,scores,n);
+  
+  let best=-INF,bestMove=0,flag=1,legal=0;
+  const mover=b.side;
+  
+  for(let i=0;i<n;i++){
+    const m=moves[i];
+    const isCap=(b.sq[m&127]!==0);
+    
+    // Futility + LMP
+    if(!isPv&&!inChk&&legal>0&&!isCap){
+      if(depth<=2&&se+150*depth<=alpha)continue;
+      if(depth<=3&&legal>=6+depth*4)continue;
+    }
+    
+    b.makeMove(m);
+    if(b.inCheck(mover)){b.undoMove();continue;}
+    legal++;
+    const givesCheck=b.inCheck();
+    
+    let score;
+    if(legal===1){
+      score=-negamax(b,depth-1,-beta,-alpha,ply+1,true,m);
+    }else{
+      let reduction=0;
+      if(depth>=3&&legal>=4&&!isCap&&!inChk&&!givesCheck){
+        reduction=LMR_TABLE[Math.min(depth,63)][Math.min(legal,63)];
+        if(isPv)reduction=Math.max(0,reduction-1);
+      }
+      score=-negamax(b,depth-1-reduction,-alpha-1,-alpha,ply+1,true,m);
+      if(score>alpha&&reduction>0)
+        score=-negamax(b,depth-1,-alpha-1,-alpha,ply+1,true,m);
+      if(score>alpha&&score<beta)
+        score=-negamax(b,depth-1,-beta,-alpha,ply+1,true,m);
+    }
+    
+    b.undoMove();
+    if(SEARCH_STATE.aborted)return 0;
+    
+    if(score>best){
+      best=score;bestMove=m;
+      if(score>alpha){
+        alpha=score;flag=0;
+        if(alpha>=beta){
+          flag=2;
+          if(!isCap){
+            if(m!==killerMoves[ply][0]){
+              killerMoves[ply][1]=killerMoves[ply][0];
+              killerMoves[ply][0]=m;
+            }
+            const f=m>>7,t=m&127;
+            historyMoves[f*90+t]+=depth*depth;
+            if(historyMoves[f*90+t]>500000)
+              for(let i=0;i<9000;i++)historyMoves[i]>>=1;
+            if(prevMove!==0){
+              const pf=prevMove>>7,pt=prevMove&127;
+              counterMoves[pf*90+pt]=m;
+            }
+          }
+          break;
+        }
+      }
+    }
+  }
+  
+  if(legal===0)return -MATE+ply;
+  ttStore(b.hash,depth,best,flag,bestMove,ply);
+  return best;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 9. OPENING BOOK (nhỏ, an toàn)
+// ═══════════════════════════════════════════════════════════════════════════
+const OPENING_BOOK={
+  "":"h2e2 c3c4 b2e2 h0g2 b0c2",
+  "h2e2":"h9g7 h7e7 b7e7 b9c7",
+  "h2e2 h9g7":"h0g2 b2c2 i0h0",
+  "h2e2 h9g7 h0g2":"b7c6 b9c7 i9h9",
+  "c3c4":"h9g7 c6c5 g3g4",
+  "b2e2":"h9g7 b0c2 b7c6",
+  "h0g2":"h9g7 b0c2 b7c6",
+};
+
+function ucciToMove(u){
+  if(u.length<4)return 0;
+  const c1=u.charCodeAt(0)-97,r1=9-parseInt(u[1]);
+  const c2=u.charCodeAt(2)-97,r2=9-parseInt(u[3]);
+  if(c1<0||c1>8||c2<0||c2>8||r1<0||r1>9||r2<0||r2>9)return 0;
+  return(((r1*9+c1)<<7)|(r2*9+c2));
+}
+
+function getBookMove(b,moveHistory){
+  const key=moveHistory.join(" ");
+  const entry=OPENING_BOOK[key];
+  if(!entry)return 0;
+  const options=entry.split(" ");
+  const legal=[];
+  const buf=new Int32Array(MAX_MOVES);
+  const n=b.genPseudo(buf,false);
+  const mover=b.side;
+  const legalSet=new Set();
+  for(let i=0;i<n;i++){
+    b.makeMove(buf[i]);
+    if(!b.inCheck(mover))legalSet.add(buf[i]);
+    b.undoMove();
+  }
+  for(const u of options){const m=ucciToMove(u);
+    if(m&&legalSet.has(m))legal.push(m);}
+  if(legal.length===0)return 0;
+  return legal[Math.floor(Math.random()*legal.length)];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 10. ITERATIVE DEEPENING
+// ═══════════════════════════════════════════════════════════════════════════
+async function iterativeDeepening(b,maxDepth,msLimit,onInfo,moveHistory){
+  SEARCH_STATE.nodes=0;SEARCH_STATE.startTime=performance.now();
+  SEARCH_STATE.limit=msLimit;SEARCH_STATE.aborted=false;
+  ttGen=(ttGen+1)&255;
+  resetSearch();
+  
+  // Book check
+  const bookMove=getBookMove(b,moveHistory||[]);
+  if(bookMove)return bookMove;
+  
+  const rootMoves=[];
+  const buf=new Int32Array(MAX_MOVES);
+  const n=b.genPseudo(buf,false);
+  const mover=b.side;
+  for(let i=0;i<n;i++){
+    b.makeMove(buf[i]);
+    if(!b.inCheck(mover))rootMoves.push(buf[i]);
+    b.undoMove();
+  }
+  if(rootMoves.length===0)return 0;
+  if(rootMoves.length===1)return rootMoves[0];
+  
+  let bestMove=rootMoves[0],prevScore=0;
+  
+  for(let depth=1;depth<=maxDepth;depth++){
+    await new Promise(r=>setTimeout(r,0));
+    
+    // FIX: aspiration window đúng (fail-low chỉ mở alpha, không co beta)
+    let delta=25,alpha=-INF,beta=INF;
+    if(depth>=4){
+      alpha=Math.max(-INF,prevScore-delta);
+      beta=Math.min(INF,prevScore+delta);
+    }else delta=INF;
+    
+    let localBest=bestMove,localScore=-INF;
+    const rootScores=rootMoves.map(m=>m===bestMove?2000000:scoreMove(b,m,0,0,0));
+    const tmp=[...rootMoves];
+    sortMoves(tmp,new Int32Array(rootScores),tmp.length);
+    rootMoves.length=0;rootMoves.push(...tmp);
+    
+    while(true){
+      localBest=rootMoves[0];localScore=-INF;
+      let a=alpha;
+      for(const m of rootMoves){
+        b.makeMove(m);
+        const s=-negamax(b,depth-1,-beta,-a,1,true,m);
+        b.undoMove();
+        if(SEARCH_STATE.aborted)break;
+        if(s>localScore){localScore=s;localBest=m;}
+        if(s>a)a=s;
+      }
+      if(SEARCH_STATE.aborted)break;
+      
+      // FIX: chỉ mở rộng phía fail
+      if(depth>=4){
+        if(localScore<=alpha){
+          alpha=Math.max(-INF,alpha-delta);
+          delta*=2;
+        }else if(localScore>=beta){
+          beta=Math.min(INF,beta+delta);
+          delta*=2;
+        }else break;
+      }else break;
+    }
+    if(SEARCH_STATE.aborted)break;
+    
+    bestMove=localBest;prevScore=localScore;
+    if(onInfo)onInfo(depth,localScore,SEARCH_STATE.nodes);
+    
+    if(Math.abs(localScore)>MATE_TH-100)break;
+    // FIX: dùng 85% budget, không early break sớm
+    const elapsed=performance.now()-SEARCH_STATE.startTime;
+    if(elapsed>=msLimit*0.85)break;
+  }
+  return bestMove;
+}
+
+
+      function boardMatrixToFen(B, aiSide) {
+        const pieceMap = {
+          'k': 'k', 'a': 'a', 'e': 'b', 'h': 'n', 'r': 'r', 'c': 'c', 'p': 'p',
+          'K': 'K', 'A': 'A', 'E': 'B', 'H': 'N', 'R': 'R', 'C': 'C', 'P': 'P'
+        };
+        const rows = [];
+        for (let r = 0; r < 10; r++) {
+          let empty = 0;
+          let rowStr = '';
+          for (let c = 0; c < 9; c++) {
+            const p = B[r][c];
+            if (!p) {
+              empty++;
+            } else {
+              if (empty > 0) { rowStr += empty; empty = 0; }
+              rowStr += (pieceMap[p] || p);
+            }
+          }
+          if (empty > 0) rowStr += empty;
+          rows.push(rowStr);
+        }
+        const sideChar = (aiSide === 1) ? 'w' : 'b';
+        return rows.join('/') + ' ' + sideChar + ' - - 0 1';
+      }
+
+      function moveArrayToUcci(m) {
+        if (!Array.isArray(m) || m.length < 4) return '';
+        const [r1, c1, r2, c2] = m;
+        const fc = String.fromCharCode(97 + c1);
+        const fr = 9 - r1;
+        const tc = String.fromCharCode(97 + c2);
+        const tr = 9 - r2;
+        return '' + fc + fr + tc + tr;
+      }
+
+      function decodeSwMoveToCoord(mv) {
+        if (!mv) return null;
+        const f = mv >> 7;
+        const t = mv & 127;
+        return [Math.floor(f / 9), f % 9, Math.floor(t / 9), t % 9];
+      }
+
+      async function searchBestMove(B, aiSide, hist, maxDepth = 8, msLimit = 2200) {
+        const fen = boardMatrixToFen(B, aiSide);
+        const swBoard = new Board(fen);
+        const ucciHist = Array.isArray(hist) ? hist.map(moveArrayToUcci).filter(Boolean) : [];
+        const swMove = await iterativeDeepening(swBoard, maxDepth, msLimit, null, ucciHist);
+        return decodeSwMoveToCoord(swMove);
+      }
+
+      return { searchBestMove };
+    })();
+  }
+
+  function createCoUpEngineNamespace() {
+    return (function() {
+const INIT = ['rheakaehr','.........','.c.....c.','p.p.p.p.p','.........','.........','P.P.P.P.P','.C.....C.','.........','RHEAKAEHR'];
       const D4 = [[-1,0],[1,0],[0,-1],[0,1]];
       const DG = [[-1,-1],[-1,1],[1,-1],[1,1]];
       const sd = p => p < 'a' ? 1 : 0;
@@ -8764,21 +9548,63 @@ try{
         return globalBestMove;
       }
 
-      self.onmessage = function(ev) {
+      
+      
+      return {
+        searchCoUpMove: function(B, U, aiSide, hist, coUpFlag) {
+          isCoUp = !!coUpFlag;
+          return computeBestMoveInWorker(B, U, aiSide, hist || []);
+        },
+        getLegalMoves: function(B, aiSide, U, coUpFlag) {
+          isCoUp = !!coUpFlag;
+          return legal(B, aiSide, U);
+        }
+      };
+    })();
+  }
+
+  // Khởi tạo sẵn instance dự phòng trên Main Thread (phòng trường hợp mở file:// hoặc WebView chặn Worker)
+  const mainThreadSwV2 = createSwV2Namespace();
+  const mainThreadCoUp = createCoUpEngineNamespace();
+
+  function createAiEngineWorkerCode() {
+    return `
+      const SwV2Engine = (${createSwV2Namespace.toString()})();
+      const CoUpEngine = (${createCoUpEngineNamespace.toString()})();
+
+      self.onmessage = async function(ev) {
         const d = ev.data;
         if (!d || d.cmd !== 'search') return;
-        isCoUp = !!d.isCoUp;
-        const bestMv = computeBestMoveInWorker(d.B, d.U, d.aiSide, d.hist || []);
+        const isCoUp = !!d.isCoUp;
+
+        if (!isCoUp) {
+          try {
+            let bestCoord = await SwV2Engine.searchBestMove(d.B, d.aiSide, d.hist || [], 8, 2200);
+            if (!bestCoord) {
+              const fallbackLeg = CoUpEngine.getLegalMoves(d.B, d.aiSide, null, false);
+              bestCoord = fallbackLeg[0] || null;
+            }
+            self.postMessage({ reqId: d.reqId, move: bestCoord });
+            return;
+          } catch (err) {
+            console.warn('[Sw v2 Worker Error]:', err);
+          }
+        }
+
+        const bestMv = CoUpEngine.searchCoUpMove(d.B, d.U, d.aiSide, d.hist || [], isCoUp);
         self.postMessage({ reqId: d.reqId, move: bestMv });
       };
     `;
   }
 
   let aiWorker = null;
+  let aiWorkerFailed = false;
   let aiWorkerReqId = 0;
   let aiPendingResolve = null;
+  let aiPendingTimeout = null;
 
   function ensureAiWorker() {
+    if (aiWorkerFailed) return null;
     if (aiWorker) return aiWorker;
     try {
       const blob = new Blob([createAiEngineWorkerCode()], { type: 'application/javascript' });
@@ -8786,38 +9612,82 @@ try{
       aiWorker = new Worker(url);
       aiWorker.onmessage = function(ev) {
         if (aiPendingResolve && ev.data && ev.data.reqId === aiWorkerReqId) {
+          if (aiPendingTimeout) { clearTimeout(aiPendingTimeout); aiPendingTimeout = null; }
           const r = aiPendingResolve;
           aiPendingResolve = null;
           r(ev.data.move);
         }
       };
+      aiWorker.onerror = function(err) {
+        console.warn('[AI Worker Runtime Error -> Switching to Main Thread SwV2]:', err);
+        aiWorkerFailed = true;
+        aiWorker = null;
+      };
     } catch (err) {
-      console.warn('[AI Worker] Fallback:', err);
+      console.warn('[AI Worker Init Fallback]:', err);
+      aiWorkerFailed = true;
       aiWorker = null;
     }
     return aiWorker;
   }
   ensureAiWorker();
 
+  async function computeFallbackOnMainThread(aiSide) {
+    try {
+      if (!isCoUp) {
+        const mv = await mainThreadSwV2.searchBestMove(B.map(r => r.slice()), aiSide, hist.slice(), 7, 1800);
+        if (mv) return mv;
+      } else {
+        const mv = mainThreadCoUp.searchCoUpMove(B.map(r => r.slice()), U ? U.map(r => r.slice()) : null, aiSide, hist.slice(), true);
+        if (mv) return mv;
+      }
+    } catch (e) {
+      console.warn('[MainThread AI Fallback Error]:', e);
+    }
+    const leg = legal(B, aiSide, U);
+    return leg[0] || null;
+  }
+
   function requestAiMoveAsync(aiSide) {
-    return new Promise(resolve => {
+    return new Promise(async resolve => {
       const w = ensureAiWorker();
       if (!w) {
-        const leg = legal(B, aiSide, U);
-        resolve(leg[0] || null);
+        const mv = await computeFallbackOnMainThread(aiSide);
+        resolve(mv);
         return;
       }
-      aiWorkerReqId++;
+      const myReqId = ++aiWorkerReqId;
       aiPendingResolve = resolve;
-      w.postMessage({
-        cmd: 'search',
-        reqId: aiWorkerReqId,
-        B: B.map(r => r.slice()),
-        U: U ? U.map(r => r.slice()) : null,
-        isCoUp: !!isCoUp,
-        aiSide: aiSide,
-        hist: hist.slice(-6)
-      });
+      if (aiPendingTimeout) clearTimeout(aiPendingTimeout);
+      // Bảo hiểm 4.2 giây: nếu Worker bị treo hoặc trình duyệt chặn Blob Worker, tự động chạy Engine Sw v2 trực tiếp để AI không bao giờ đứng im!
+      aiPendingTimeout = setTimeout(async () => {
+        if (aiPendingResolve && aiWorkerReqId === myReqId) {
+          aiPendingResolve = null;
+          aiWorkerFailed = true;
+          aiWorker = null;
+          const fallbackMv = await computeFallbackOnMainThread(aiSide);
+          resolve(fallbackMv);
+        }
+      }, 4200);
+
+      try {
+        w.postMessage({
+          cmd: 'search',
+          reqId: myReqId,
+          B: B.map(r => r.slice()),
+          U: U ? U.map(r => r.slice()) : null,
+          isCoUp: !!isCoUp,
+          aiSide: aiSide,
+          hist: hist.slice()
+        });
+      } catch (err) {
+        if (aiPendingTimeout) { clearTimeout(aiPendingTimeout); aiPendingTimeout = null; }
+        aiPendingResolve = null;
+        aiWorkerFailed = true;
+        aiWorker = null;
+        const fallbackMv = await computeFallbackOnMainThread(aiSide);
+        resolve(fallbackMv);
+      }
     });
   }
 
@@ -8870,8 +9740,12 @@ try{
       }
 
       const thinkStart = performance.now();
-      const mv = await requestAiMoveAsync(aiColor);
+      let mv = await requestAiMoveAsync(aiColor);
       if (!mv || !window.isAiOnlineMatch || over || !bothPlayersReady || turn !== aiColor) return;
+      if (typeof isPerpetualCheckViolation === 'function' && isPerpetualCheckViolation(B, mv, aiColor, U)) {
+        const safeAlts = legal(B, aiColor, U).filter(cand => !isPerpetualCheckViolation(B, cand, aiColor, U));
+        if (safeAlts.length > 0) mv = safeAlts[0];
+      }
 
       // Đảm bảo nhịp suy nghĩ tự nhiên như người thật (tối thiểu 900ms - 1350ms kể cả khi sách khai cuộc trả về tức thì)
       const elapsed = performance.now() - thinkStart;
@@ -9679,14 +10553,17 @@ try{
   }
 
   /* =========================================================================
-     PHẦN 2: LUẬT CỜ TƯỚNG VIỆT NAM — GIỚI HẠN LẶP LẠI 5 LẦN
-     - Lặp lại chiếu tướng (Trường Chiếu): Cảnh báo ở lần thứ 4, CẤM ở lần thứ 5
-     - Lặp lại nước đi không chiếu: Tự động xử HÒA CỜ ở lần thứ 5
+     PHẦN 2: LUẬT CỜ TƯỚNG VIỆT NAM — CHIẾU QUÁ 5 LẦN XỬ THUA VÌ CHIẾU DAI
+     - Khi một bên chiếu liên tiếp (hoặc lặp lại chiếu):
+       + Lần thứ 4: Cảnh báo chiếu lần 4
+       + Lần thứ 5: Cảnh báo gắt chiếu lần 5 (Chiếu thêm 1 lần nữa sẽ bị xử thua)
+       + Lần thứ 6 (tức quá 5 lần chiếu mà không chiếu bí): XỬ THUA NGAY LẬP TỨC người chiếu vì phạm luật Chiếu Dai!
+     - Lặp lại nước đi không chiếu 5 lần: Tự động xử HÒA CỜ
      - 60 hiệp (120 nước) không ăn quân: Tự động xử HÒA CỜ
-     - Phân biệt rõ "Chiếu Bí (Tuyệt Sát)" và "Khốn Tướng (Hết nước đi hợp lệ)"
      ========================================================================= */
   window._posHashHistory = [];
   window._halfMoveClock = 0;
+  window._consecutiveChecks = [0, 0];
 
   function computeBoardHash(b, turnSide, u) {
     let s = turnSide + '|';
@@ -9704,16 +10581,19 @@ try{
   function rebuildPosHashHistory() {
     window._posHashHistory = [];
     window._halfMoveClock = 0;
+    window._consecutiveChecks = [0, 0];
     const simB = cloneB(currentInitB || init());
     const simU = isCoUp ? makeInitU() : null;
     let simTurn = 1;
     window._posHashHistory.push({
       hash: computeBoardHash(simB, simTurn, simU),
       checked: false,
-      bySide: -1
+      bySide: -1,
+      consecBySide: 0
     });
     for (let i = 0; i < hist.length; i++) {
       const m = hist[i];
+      const moverSide = simTurn;
       const cap = simB[m[2]] && simB[m[2]][m[3]];
       const wasHidden = isCoUp && simU && simU[m[0]] && simU[m[0]][m[1]];
       mk(simB, m, simU);
@@ -9721,72 +10601,49 @@ try{
       else window._halfMoveClock++;
       simTurn = 1 - simTurn;
       const inChk = chk(simB, simTurn, simU);
+      if (inChk) {
+        window._consecutiveChecks[moverSide] = (window._consecutiveChecks[moverSide] || 0) + 1;
+      } else {
+        window._consecutiveChecks[moverSide] = 0;
+      }
       window._posHashHistory.push({
         hash: computeBoardHash(simB, simTurn, simU),
         checked: inChk,
-        bySide: 1 - simTurn
+        bySide: moverSide,
+        consecBySide: window._consecutiveChecks[moverSide]
       });
     }
   }
 
-  // Kiểm tra một nước đi m của phe s có vi phạm Luật Cấm Trường Chiếu lần thứ 5 không
+  // Kiểm tra một nước đi m của phe s có làm phe s vượt quá 5 lần chiếu (lần thứ 6) dẫn tới bị xử thua vì Chiếu Dai không (dùng cho AI tránh tự sát)
   function isPerpetualCheckViolation(b, m, s, u) {
-    if (!window._posHashHistory || window._posHashHistory.length < 8) return false;
     const st = mk(b, m, u);
     const nextTurn = 1 - s;
     const givesCheck = chk(b, nextTurn, u);
     const targetHash = computeBoardHash(b, nextTurn, u);
+    // Nếu nước chiếu này chiếu bí luôn đối phương thì hợp lệ 100%
+    const oppHasMoves = givesCheck ? legal(b, nextTurn, u).length > 0 : true;
     un(b, m, st, u);
 
-    if (!givesCheck) return false;
+    if (!givesCheck || !oppHasMoves) return false;
 
-    // Đếm số lần hình cờ targetHash đã xuất hiện trước đó kèm trạng thái chiếu
-    let sameCheckCount = 0;
-    for (let i = 0; i < window._posHashHistory.length; i++) {
-      const item = window._posHashHistory[i];
-      if (item.hash === targetHash && item.checked && item.bySide === s) {
-        sameCheckCount++;
+    const curConsec = (window._consecutiveChecks && window._consecutiveChecks[s]) ? window._consecutiveChecks[s] : 0;
+    if (curConsec >= 5) return true;
+
+    if (window._posHashHistory && window._posHashHistory.length >= 8) {
+      let sameCheckCount = 0;
+      for (let i = 0; i < window._posHashHistory.length; i++) {
+        const item = window._posHashHistory[i];
+        if (item.hash === targetHash && item.checked && item.bySide === s) {
+          sameCheckCount++;
+        }
       }
+      if (sameCheckCount >= 5) return true;
     }
-    // Nếu đã lặp lại >= 4 lần trước đó (tức nước này là lần thứ 5 tạo cùng hình cờ chiếu), CẤM theo luật 5 lần
-    return sameCheckCount >= 4;
+    return false;
   }
 
   const origSelect = window.select;
-  if (typeof origSelect === 'function') {
-    window.select = function(r, c) {
-      origSelect.apply(this, arguments);
-      if (window.isReplayMode) return;
-      if (!sel || !moves || !moves.length) return;
-
-      const allLegal = legal(B, turn, U);
-      const nonPerpetualAll = allLegal.filter(mv => !isPerpetualCheckViolation(B, mv, turn, U));
-
-      if (nonPerpetualAll.length > 0) {
-        const filteredPieceMoves = moves.filter(mv => !isPerpetualCheckViolation(B, mv, turn, U));
-        if (filteredPieceMoves.length < moves.length) {
-          moves = filteredPieceMoves;
-          clr();
-          let newFrag = null;
-          for (let i = 0; i < moves.length; i++) {
-            const m = moves[i];
-            let h = hnPool[i];
-            if (!h) { h = document.createElement('div'); hnPool[i] = h; }
-            if (!h.parentNode) {
-              if (!newFrag) newFrag = document.createDocumentFragment();
-              newFrag.appendChild(h);
-            }
-            h.className = 'hn' + (B[m[2]][m[3]] ? ' x' : '');
-            h.style.left = X(m[3]) + '%';
-            h.style.top = Y(m[2]) + '%';
-            h.style.display = 'block';
-          }
-          if (newFrag) bd.appendChild(newFrag);
-          showRuleToast('⚖️ Luật Cờ Việt Nam: Đã khóa nước lặp lại <b>Trường Chiếu lần thứ 5</b>! Hãy đổi nước biến khác.');
-        }
-      }
-    };
-  }
 
   /* =========================================================================
      PHẦN 3: LỊCH SỬ CHIẾN ĐẤU & XEM LẠI KỲ PHỔ VỚI HIỆU ỨNG CẦM QUÂN MƯỢT MÀ
@@ -9833,9 +10690,11 @@ try{
       ? 'Hết thời gian'
       : (reason === 'surrender'
           ? 'Đầu hàng'
-          : (reason === 'nomove'
-              ? 'Khốn tướng (Hết nước đi)'
-              : (reason === 'draw' ? 'Hòa cờ' : 'Chiếu bí (Tuyệt sát)')));
+          : (reason === 'perpetual'
+              ? 'Xử thua vì Chiếu dai (quá 5 lần)'
+              : (reason === 'nomove'
+                  ? 'Khốn tướng (Hết nước đi)'
+                  : (reason === 'draw' ? 'Hòa cờ' : 'Chiếu bí (Tuyệt sát)'))));
 
     const rec = {
       id: 'm_' + Date.now(),
@@ -10144,14 +11003,25 @@ try{
       await origExecutePlay.apply(this, arguments);
       rebuildPosHashHistory();
 
-      if (!over && window._posHashHistory.length > 6) {
+      if (!over && window._posHashHistory.length > 1) {
         const latest = window._posHashHistory[window._posHashHistory.length - 1];
         let sameCount = 0;
         for (let i = 0; i < window._posHashHistory.length; i++) {
           if (window._posHashHistory[i].hash === latest.hash) sameCount++;
         }
-        if (sameCount === 4 && latest.checked) {
-          showRuleToast('⚠️ Cảnh báo Luật Cờ Việt Nam: Đã lặp lại nước chiếu lần thứ 4 (Cấm lặp lại quá 5 lần)!');
+        const checkCountNow = latest.checked ? Math.max(latest.consecBySide || 0, sameCount) : 0;
+
+        if (latest.checked && checkCountNow > 5) {
+          const checkerSide = latest.bySide;
+          const winnerSide = 1 - checkerSide;
+          const checkerLabel = checkerSide === 1 ? 'Bên Đỏ' : 'Bên Đen';
+          showRuleToast(`⚖️ ${checkerLabel} đã chiếu quá 5 lần liên tiếp (${checkCountNow} lần) — XỬ THUA VÌ CHIẾU DAI!`);
+          finish('perpetual', winnerSide);
+          return;
+        } else if (latest.checked && checkCountNow === 5) {
+          showRuleToast('🚨 Cảnh báo Chiếu Dai: Đã chiếu lần thứ 5! Chiếu thêm 1 lần nữa sẽ bị XỬ THUA ngay lập tức!');
+        } else if (latest.checked && checkCountNow === 4) {
+          showRuleToast('⚠️ Cảnh báo Chiếu Dai: Đã chiếu liên tiếp 4 lần (Chiếu quá 5 lần sẽ bị xử thua)!');
         } else if (sameCount >= 5 && !latest.checked) {
           showRuleToast('⚖️ Luật Cờ Việt Nam: Hình cờ lặp lại 5 lần không chiếu — Xử HÒA CỜ!');
           finish('draw', -1);
@@ -10172,6 +11042,11 @@ try{
         const endDesc = document.querySelector('#end > div');
         if (endDesc && endDesc.textContent.indexOf('Khốn tướng') === -1) {
           endDesc.textContent = 'Khốn tướng — Hết nước đi hợp lệ (Luật Cờ Việt Nam)';
+        }
+      } else if (reason === 'perpetual') {
+        const endDesc = document.querySelector('#end > div');
+        if (endDesc && endDesc.textContent.indexOf('chiếu dai') === -1 && endDesc.textContent.indexOf('Chiếu dai') === -1) {
+          endDesc.textContent = 'Xử thua vì chiếu dai (Chiếu quá 5 lần) — ' + endDesc.textContent;
         }
       }
       recordMatchHistory(reason, winner);
